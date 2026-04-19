@@ -1,0 +1,35 @@
+state_name,reliability_gap,disruption_rate_pct,piped_water_coverage_pct,n_households
+Sikkim,18.5,40.1,83.5,3477
+Meghalaya,17.1,37.3,64.5,7551
+Karnataka,14.2,36.6,74.7,23317
+Maharashtra,14.0,33.1,80.8,28416
+Andaman & Nicobar Islands,13.6,43.5,93.1,2150
+Arunachal Pradesh,10.4,37.5,78.4,17663
+Lakshadweep,8.5,25.5,30.7,869
+Telangana,8.3,26.5,71.1,19148
+Gujarat,6.3,26.1,75.4,27602
+Manipur,6.3,30.7,37.8,5582
+Nagaland,5.9,28.3,76.3,7867
+Tamil Nadu,4.8,26.1,84.3,26169
+Madhya Pradesh,3.7,19.0,50.8,38886
+Jammu & Kashmir,1.7,30.5,83.8,15656
+NCT of Delhi,1.0,20.6,86.6,8928
+Andhra Pradesh,0.2,18.1,71.6,7947
+Himachal Pradesh,0.2,28.6,87.9,9475
+Kerala,-2.1,22.1,32.7,11857
+Goa,-2.8,20.3,92.9,1849
+Haryana,-3.3,21.5,76.2,17379
+Bihar,-3.9,12.5,13.1,35318
+Ladakh,-4.7,18.3,70.8,1591
+Odisha,-6.4,13.9,34.4,24318
+Dadra & Nagar Haveli and Daman & Diu,-6.5,9.8,55.8,2180
+Chandigarh,-7.0,12.7,96.7,745
+Jharkhand,-7.5,12.1,31.7,19363
+Tripura,-7.5,14.5,46.1,6401
+Chhattisgarh,-8.0,13.6,53.4,23289
+Punjab,-8.9,15.6,76.6,18342
+Uttarakhand,-11.6,13.2,76.3,10999
+West Bengal,-11.8,7.8,40.2,17451
+Mizoram,-12.1,10.5,94.5,6413
+Assam,-14.6,8.8,12.6,28083
+Puducherry,-16.2,7.8,87.9,3373

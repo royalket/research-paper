@@ -1,0 +1,21 @@
+district_name,state_name,reliability_gap,disruption_rate_pct,piped_water_coverage_pct,district_typology,n_households
+Botad,Gujarat,49.5,72.2,78.6,High Coverage High Disruption (Reliability Gap),856
+Porbandar,Gujarat,46.5,69.7,87.7,High Coverage High Disruption (Reliability Gap),861
+Devbhumi Dwarka,Gujarat,42.5,64.6,89.8,High Coverage High Disruption (Reliability Gap),869
+Kra Daadi,Arunachal Pradesh,39.1,59.5,99.5,High Coverage High Disruption (Reliability Gap),515
+Jalgaon,Maharashtra,37.5,59.1,82.5,High Coverage High Disruption (Reliability Gap),801
+Longding,Arunachal Pradesh,37.3,54.5,78.9,High Coverage High Disruption (Reliability Gap),676
+Akola,Maharashtra,35.2,56.9,82.2,High Coverage High Disruption (Reliability Gap),885
+Tawang,Arunachal Pradesh,34.9,56.9,99.9,High Coverage High Disruption (Reliability Gap),903
+Chikkaballapura,Karnataka,33.5,55.7,58.4,High Coverage High Disruption (Reliability Gap),655
+Surendranagar,Gujarat,32.9,54.8,85.1,High Coverage High Disruption (Reliability Gap),809
+Tirap,Arunachal Pradesh,32.4,51.5,93.0,High Coverage High Disruption (Reliability Gap),936
+Junagadh,Gujarat,32.0,54.2,87.6,High Coverage High Disruption (Reliability Gap),824
+Gulbarga,Karnataka,31.9,51.6,67.3,High Coverage High Disruption (Reliability Gap),827
+South District,Sikkim,31.7,54.2,88.1,High Coverage High Disruption (Reliability Gap),874
+Nashik,Maharashtra,31.5,51.9,81.0,High Coverage High Disruption (Reliability Gap),797
+Ahmadnagar,Maharashtra,31.1,53.3,71.6,High Coverage High Disruption (Reliability Gap),765
+East Jantia Hills,Meghalaya,31.1,49.9,64.4,High Coverage High Disruption (Reliability Gap),432
+North & Middle Andaman,Andaman & Nicobar Islands,30.4,53.5,93.9,High Coverage High Disruption (Reliability Gap),820
+Jamnagar,Gujarat,29.5,53.5,91.2,High Coverage High Disruption (Reliability Gap),900
+East Khasi Hills,Meghalaya,29.4,48.4,82.0,High Coverage High Disruption (Reliability Gap),782

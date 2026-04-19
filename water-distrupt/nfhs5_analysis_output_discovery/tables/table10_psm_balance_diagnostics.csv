@@ -1,0 +1,39 @@
+Covariate,Std_Diff_Before,Std_Diff_After,Balanced
+wealth_quintile_Middle,0.13,-0.005,True
+wealth_quintile_Poorer,-0.168,0.006,True
+wealth_quintile_Poorest,-0.556,0.012,True
+wealth_quintile_Richer,0.286,-0.005,True
+wealth_quintile_Richest,0.417,-0.006,True
+urban_0,-0.578,-0.019,True
+urban_1,0.578,0.019,True
+hh_size,-0.187,0.002,True
+children_under5_count,-0.18,0.012,True
+is_female_headed_0,-0.025,-0.038,True
+is_female_headed_1,0.025,0.038,True
+caste_Don't know,0.017,0.012,True
+caste_General,0.146,0.01,True
+caste_OBC,-0.123,-0.038,True
+caste_SC,-0.048,0.008,True
+caste_ST,0.091,-0.002,True
+caste_Unknown Caste,-0.068,0.062,True
+region_Central,-0.408,-0.009,True
+region_East,-0.322,-0.002,True
+region_North,0.512,-0.008,True
+region_Northeast,0.047,0.024,True
+region_South,0.507,0.007,True
+region_Unknown Region,-0.469,-0.014,True
+region_West,0.306,-0.001,True
+season_Monsoon,0.058,0.005,True
+season_Post-monsoon,0.127,0.022,True
+season_Summer,-0.083,0.005,True
+season_Unknown Season,0.021,-0.008,True
+season_Winter,-0.078,-0.017,True
+hh_head_education_Higher,0.151,0.019,True
+hh_head_education_No education,-0.167,-0.0,True
+hh_head_education_Primary,-0.028,0.003,True
+hh_head_education_Secondary,0.091,-0.016,True
+hh_head_education_Unknown Education,-0.001,0.015,True
+has_electricity_0,-0.196,0.024,True
+has_electricity_1,0.196,-0.024,True
+improved_sanitation_flag_0,-0.529,0.037,True
+improved_sanitation_flag_1,0.529,-0.037,True

@@ -1,0 +1,22 @@
+Breakdown Variable,Category,Piped Disruption Rate (%),Piped N,Tube Well Disruption Rate (%),Tube Well N,Paradox Ratio (Piped/Tube Well)
+Wealth Quintile,Middle,27.7,69326,10.5,36492,2.6
+Wealth Quintile,Poorest,23.8,42258,10.8,78338,2.2
+Wealth Quintile,Poorer,27.1,60753,10.2,56617,2.6
+Wealth Quintile,Richer,27.0,68173,10.1,24245,2.7
+Wealth Quintile,Richest,22.1,69372,10.2,16495,2.2
+Residence Type,Rural,26.4,201613,10.5,187777,2.5
+Residence Type,Urban,24.4,108269,10.5,24410,2.3
+Region,North,21.9,67922,11.2,10598,2.0
+Region,Unknown Region,19.1,32916,7.3,61070,2.6
+Region,Central,22.4,23940,12.2,46556,1.8
+Region,Northeast,26.2,42926,7.8,26061,3.4
+Region,East,12.8,31868,9.3,46644,1.4
+Region,West,33.5,43561,19.7,10896,1.7
+Region,South,29.9,66749,20.3,10362,1.5
+House Type,Katcha,25.2,198522,10.8,83051,2.3
+House Type,Semi-pucca,26.3,92106,9.9,110428,2.7
+House Type,Unknown House Type,23.8,4194,10.0,2827,2.4
+House Type,Pucca,24.8,15060,12.5,15881,2.0
+Household Size Category,3-5,25.5,193799,10.6,130257,2.4
+Household Size Category,6+,26.2,57884,10.3,51891,2.5
+Household Size Category,<3,24.8,58199,10.4,30039,2.4

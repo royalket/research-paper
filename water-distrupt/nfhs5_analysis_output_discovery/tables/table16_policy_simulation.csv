@@ -1,0 +1,4 @@
+Scenario,% Piped Coverage,National Disruption Rate (%),Disruption Urban (%),Disruption Rural (%)
+Current Scenario,51.9,18.8,21.0,17.6
+Universal Piped Water (Current Reliability),100.0,25.5,25.5,25.5
+Universal Piped Water (Enhanced Reliability),100.0,10.5,10.5,10.5

@@ -1,0 +1,35 @@
+state_name,paradox_ratio,paradox_category,piped_disruption_rate,tube_well_disruption_rate,n_households
+Chandigarh,inf,Strong Paradox,12.8,0.0,745
+Andaman & Nicobar Islands,5.6,Strong Paradox,45.2,8.0,2150
+Manipur,4.2,Strong Paradox,47.8,11.4,5582
+Ladakh,3.7,Strong Paradox,22.4,6.1,1591
+Nagaland,3.4,Strong Paradox,32.1,9.6,7867
+Tripura,3.2,Strong Paradox,23.2,7.2,6401
+Tamil Nadu,3.0,Strong Paradox,29.1,9.8,26169
+Jammu & Kashmir,2.5,Strong Paradox,33.2,13.5,15656
+Andhra Pradesh,2.4,Strong Paradox,21.5,8.8,7947
+Himachal Pradesh,2.4,Strong Paradox,30.8,12.8,9475
+Arunachal Pradesh,2.2,Strong Paradox,42.0,19.0,17663
+Dadra & Nagar Haveli and Daman & Diu,2.1,Strong Paradox,12.7,6.0,2180
+Assam,1.9,Moderate Paradox,14.7,7.6,28083
+Gujarat,1.8,Moderate Paradox,29.1,15.8,27602
+Telangana,1.8,Moderate Paradox,30.8,16.9,19148
+Madhya Pradesh,1.8,Moderate Paradox,24.3,13.5,38886
+Uttarakhand,1.8,Moderate Paradox,14.7,8.2,10999
+Kerala,1.8,Moderate Paradox,29.3,16.5,11857
+NCT of Delhi,1.8,Moderate Paradox,21.2,12.1,8928
+Meghalaya,1.7,Moderate Paradox,41.8,24.3,7551
+Punjab,1.7,Moderate Paradox,17.1,10.0,18342
+Haryana,1.7,Moderate Paradox,23.4,13.9,17379
+Puducherry,1.7,Moderate Paradox,8.1,4.9,3373
+Goa,1.7,Moderate Paradox,21.3,12.8,1849
+Jharkhand,1.6,Moderate Paradox,16.5,10.0,19363
+Maharashtra,1.6,Moderate Paradox,35.7,22.2,28416
+Odisha,1.6,Moderate Paradox,18.7,11.9,24318
+Bihar,1.5,Weak Paradox,17.6,11.8,35318
+West Bengal,1.4,Weak Paradox,9.5,7.0,17451
+Lakshadweep,1.2,Weak Paradox,41.4,34.7,869
+Chhattisgarh,1.0,Weak Paradox,13.9,13.6,23289
+Sikkim,0.9,No Paradox (Tube Wells Worse),42.1,47.6,3477
+Karnataka,0.9,No Paradox (Tube Wells Worse),36.9,41.7,23317
+Mizoram,0.3,No Paradox (Tube Wells Worse),10.5,31.2,6413

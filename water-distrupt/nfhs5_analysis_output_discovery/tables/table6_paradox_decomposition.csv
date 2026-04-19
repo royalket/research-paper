@@ -1,0 +1,5 @@
+Characteristic,"Expected Vulnerable (High WVI, High Disruption)","Paradoxical (Low WVI, High Disruption)","Resilient (High WVI, Low Disruption)"
+% Piped Water Users,40.3,85.4,19.5
+% Urban Residents,2.5,72.3,1.8
+Disruption Rate (%),100.0,100.0,0.0
+"Mean Wealth Quintile (1=Poorest, 5=Richest)",1.6,4.2,1.5

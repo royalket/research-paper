@@ -1,0 +1,17 @@
+Group_Type,Primary_Category,Piped Water,Protected Well/Spring,Rural,Tube well/Borehole,Unprotected Well/Spring,Urban
+Region x Source,Central,22.4,12.4,,12.2,11.4,
+Region x Source,East,12.8,8.2,,9.3,8.2,
+Region x Source,North,21.9,15.4,,11.2,12.1,
+Region x Source,Northeast,26.2,12.7,,7.8,8.5,
+Region x Source,South,29.9,18.9,,20.3,24.6,
+Region x Source,West,33.5,18.8,,19.7,16.2,
+Wealth x Residence,Middle,,,20.3,,,22.3
+Wealth x Residence,Poorer,,,17.2,,,22.9
+Wealth x Residence,Poorest,,,14.3,,,19.3
+Wealth x Residence,Richer,,,21.1,,,22.1
+Wealth x Residence,Richest,,,17.6,,,19.6
+Wealth x Source,Middle,27.7,16.9,,10.5,13.7,
+Wealth x Source,Poorer,27.1,15.8,,10.2,12.9,
+Wealth x Source,Poorest,23.8,13.5,,10.8,10.8,
+Wealth x Source,Richer,27.0,17.7,,10.1,17.1,
+Wealth x Source,Richest,22.1,17.2,,10.2,21.2,

@@ -1,0 +1,21 @@
+district_name,state_name,reliability_gap,disruption_rate_pct,piped_water_coverage_pct,district_typology,n_households
+Gautam Buddha Nagar,Unknown State,-23.6,2.5,26.7,Low Coverage Low Disruption (Resilient),588
+Udham Singh Nagar,Uttarakhand,-21.1,2.2,43.6,Low Coverage Low Disruption (Resilient),939
+Meerut,Unknown State,-20.2,4.3,46.4,Low Coverage Low Disruption (Resilient),913
+Puducherry,Puducherry,-18.6,6.2,89.9,High Coverage Low Disruption (Success),759
+Bulandshahr,Unknown State,-18.5,4.5,18.4,Low Coverage Low Disruption (Resilient),922
+Baghpat,Unknown State,-18.5,5.9,27.4,Low Coverage Low Disruption (Resilient),925
+Kolkata,West Bengal,-18.1,3.9,82.8,High Coverage Low Disruption (Success),855
+Mumbai,Maharashtra,-18.0,6.6,99.9,High Coverage Low Disruption (Success),825
+Karaikal,Puducherry,-17.7,5.8,88.7,High Coverage Low Disruption (Success),839
+Shamli,Unknown State,-17.5,5.6,41.6,Low Coverage Low Disruption (Resilient),944
+Karnal,Haryana,-17.5,9.8,93.1,High Coverage Low Disruption (Success),917
+Kolasib,Mizoram,-17.1,4.6,94.8,High Coverage Low Disruption (Success),842
+Bijnor,Unknown State,-17.1,5.4,29.4,Low Coverage Low Disruption (Resilient),946
+Bareilly,Unknown State,-17.0,4.2,23.5,Low Coverage Low Disruption (Resilient),873
+Muzaffarnagar,Unknown State,-17.0,7.0,33.6,Low Coverage Low Disruption (Resilient),930
+Amethi,Unknown State,-17.0,1.1,3.6,Low Coverage Low Disruption (Resilient),899
+Serchhip,Mizoram,-16.9,5.1,94.4,High Coverage Low Disruption (Success),808
+Lahul & Spiti,Himachal Pradesh,-16.7,5.0,88.2,High Coverage Low Disruption (Success),761
+Yamunanagar,Haryana,-16.6,10.5,94.0,High Coverage Low Disruption (Success),910
+Gorakhpur,Unknown State,-16.4,3.3,12.6,Low Coverage Low Disruption (Resilient),925

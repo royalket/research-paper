@@ -1,0 +1,34 @@
+State,Piped Water Coverage (%),Piped Disruption Rate (%),Tube Well Disruption Rate (%),Paradox Ratio (Piped/Tube Well),N,Paradox Category
+Andaman & Nicobar Islands,93.1,45.2,8.0,5.6,2150,Strong Paradox
+Manipur,37.8,47.8,11.4,4.2,5582,Strong Paradox
+Ladakh,70.8,22.4,6.1,3.7,1591,Strong Paradox
+Nagaland,76.3,32.1,9.6,3.4,7867,Strong Paradox
+Tripura,46.1,23.2,7.2,3.2,6401,Strong Paradox
+Tamil Nadu,84.3,29.1,9.8,3.0,26169,Strong Paradox
+Unknown State,32.5,19.1,7.3,2.6,98408,Strong Paradox
+Jammu & Kashmir,83.8,33.2,13.5,2.5,15656,Strong Paradox
+Andhra Pradesh,71.6,21.5,8.8,2.4,7947,Strong Paradox
+Himachal Pradesh,87.9,30.8,12.8,2.4,9475,Strong Paradox
+Arunachal Pradesh,78.4,42.0,19.0,2.2,17663,Strong Paradox
+Dadra & Nagar Haveli and Daman & Diu,55.8,12.7,6.0,2.1,2180,Strong Paradox
+Assam,12.6,14.7,7.6,1.9,28083,Moderate Paradox
+Telangana,71.1,30.8,16.9,1.8,19148,Moderate Paradox
+Madhya Pradesh,50.8,24.3,13.5,1.8,38886,Moderate Paradox
+Kerala,32.7,29.3,16.5,1.8,11857,Moderate Paradox
+Uttarakhand,76.3,14.7,8.2,1.8,10999,Moderate Paradox
+Gujarat,75.4,29.1,15.8,1.8,27602,Moderate Paradox
+Goa,92.9,21.3,12.8,1.7,1849,Moderate Paradox
+Puducherry,87.9,8.1,4.9,1.7,3373,Moderate Paradox
+Meghalaya,64.5,41.8,24.3,1.7,7551,Moderate Paradox
+NCT of Delhi,86.6,21.2,12.1,1.7,8928,Moderate Paradox
+Haryana,76.2,23.4,13.9,1.7,17379,Moderate Paradox
+Punjab,76.6,17.1,10.0,1.7,18342,Moderate Paradox
+Maharashtra,80.8,35.7,22.2,1.6,28416,Moderate Paradox
+Jharkhand,31.7,16.5,10.0,1.6,19363,Moderate Paradox
+Odisha,34.4,18.7,11.9,1.6,24318,Moderate Paradox
+Bihar,13.1,17.6,11.8,1.5,35318,Moderate Paradox
+West Bengal,40.2,9.5,7.0,1.4,17451,Weak Paradox
+Chhattisgarh,53.4,13.9,13.6,1.0,23289,Weak Paradox
+Karnataka,74.7,36.9,41.7,0.9,23317,Weak Paradox
+Sikkim,83.5,42.1,47.6,0.9,3477,Weak Paradox
+Mizoram,94.5,10.5,31.2,0.3,6413,Weak Paradox

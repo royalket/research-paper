@@ -1,0 +1,5 @@
+Component,Variables,Weight,Justification
+Economic Vulnerability,"Wealth quintile (hv270), Wealth score (hv271)",25%,"Lower purchasing power, less ability to invest in alternatives"
+Social Vulnerability,"Caste/Tribe (sh49), Female-headed (hv219), HH head education (derived)",20%,"Marginalization, unequal access to resources, information"
+Geographic Vulnerability,"Urban/Rural (hv025), Region (hv024)",25%,"Environmental factors (e.g., water scarcity), access to services"
+Infrastructure Access (Traditional),"Water source type (hv201), Time to water (hv204)",30%,"Baseline physical access to traditional water sources, distance burden"

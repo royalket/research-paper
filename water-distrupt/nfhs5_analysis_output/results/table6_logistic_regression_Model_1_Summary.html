@@ -1,0 +1,125 @@
+<table class="simpletable">
+<caption>Logit Regression Results</caption>
+<tr>
+  <th>Dep. Variable:</th>    <td>water_disrupted</td> <th>  No. Observations:  </th>   <td>578062</td>   
+</tr>
+<tr>
+  <th>Model:</th>                 <td>Logit</td>      <th>  Df Residuals:      </th>   <td>578030</td>   
+</tr>
+<tr>
+  <th>Method:</th>                 <td>MLE</td>       <th>  Df Model:          </th>   <td>    31</td>   
+</tr>
+<tr>
+  <th>Date:</th>            <td>Sat, 11 Oct 2025</td> <th>  Pseudo R-squ.:     </th>   <td>0.03518</td>  
+</tr>
+<tr>
+  <th>Time:</th>                <td>16:10:02</td>     <th>  Log-Likelihood:    </th> <td>-2.7953e+05</td>
+</tr>
+<tr>
+  <th>converged:</th>             <td>True</td>       <th>  LL-Null:           </th> <td>-2.8972e+05</td>
+</tr>
+<tr>
+  <th>Covariance Type:</th>     <td>nonrobust</td>    <th>  LLR p-value:       </th>   <td> 0.000</td>   
+</tr>
+</table>
+<table class="simpletable">
+<tr>
+                                    <td></td>                                      <th>coef</th>     <th>std err</th>      <th>z</th>      <th>P>|z|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>Intercept</th>                                                            <td>   -1.4129</td> <td>    0.017</td> <td>  -83.244</td> <td> 0.000</td> <td>   -1.446</td> <td>   -1.380</td>
+</tr>
+<tr>
+  <th>C(wealth_quintile, Treatment('Poorest'))[T.Middle]</th>                   <td>    0.1743</td> <td>    0.011</td> <td>   15.344</td> <td> 0.000</td> <td>    0.152</td> <td>    0.197</td>
+</tr>
+<tr>
+  <th>C(wealth_quintile, Treatment('Poorest'))[T.Poorer]</th>                   <td>    0.0922</td> <td>    0.011</td> <td>    8.531</td> <td> 0.000</td> <td>    0.071</td> <td>    0.113</td>
+</tr>
+<tr>
+  <th>C(wealth_quintile, Treatment('Poorest'))[T.Richer]</th>                   <td>    0.1336</td> <td>    0.012</td> <td>   10.697</td> <td> 0.000</td> <td>    0.109</td> <td>    0.158</td>
+</tr>
+<tr>
+  <th>C(wealth_quintile, Treatment('Poorest'))[T.Richest]</th>                  <td>   -0.0285</td> <td>    0.015</td> <td>   -1.938</td> <td> 0.053</td> <td>   -0.057</td> <td>    0.000</td>
+</tr>
+<tr>
+  <th>C(is_urban, Treatment(0))[T.1]</th>                                       <td>    0.1502</td> <td>    0.009</td> <td>   17.325</td> <td> 0.000</td> <td>    0.133</td> <td>    0.167</td>
+</tr>
+<tr>
+  <th>C(caste, Treatment('General'))[T.Don't know]</th>                         <td>   -0.0204</td> <td>    0.041</td> <td>   -0.501</td> <td> 0.617</td> <td>   -0.100</td> <td>    0.059</td>
+</tr>
+<tr>
+  <th>C(caste, Treatment('General'))[T.OBC]</th>                                <td>   -0.0186</td> <td>    0.010</td> <td>   -1.864</td> <td> 0.062</td> <td>   -0.038</td> <td>    0.001</td>
+</tr>
+<tr>
+  <th>C(caste, Treatment('General'))[T.SC]</th>                                 <td>    0.0837</td> <td>    0.011</td> <td>    7.411</td> <td> 0.000</td> <td>    0.062</td> <td>    0.106</td>
+</tr>
+<tr>
+  <th>C(caste, Treatment('General'))[T.ST]</th>                                 <td>    0.1064</td> <td>    0.013</td> <td>    8.287</td> <td> 0.000</td> <td>    0.081</td> <td>    0.132</td>
+</tr>
+<tr>
+  <th>C(caste, Treatment('General'))[T.Unknown Caste]</th>                      <td>   -0.1745</td> <td>    0.019</td> <td>   -9.175</td> <td> 0.000</td> <td>   -0.212</td> <td>   -0.137</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Buddhist/Neo-Buddhist]</th>             <td>    0.4423</td> <td>    0.025</td> <td>   17.454</td> <td> 0.000</td> <td>    0.393</td> <td>    0.492</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Christian]</th>                         <td>    0.3084</td> <td>    0.015</td> <td>   20.369</td> <td> 0.000</td> <td>    0.279</td> <td>    0.338</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Jain]</th>                              <td>    0.0712</td> <td>    0.085</td> <td>    0.841</td> <td> 0.400</td> <td>   -0.095</td> <td>    0.237</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Jewish]</th>                            <td>   -0.1830</td> <td>    0.786</td> <td>   -0.233</td> <td> 0.816</td> <td>   -1.723</td> <td>    1.357</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Muslim]</th>                            <td>    0.0926</td> <td>    0.011</td> <td>    8.253</td> <td> 0.000</td> <td>    0.071</td> <td>    0.115</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Other Religion]</th>                    <td>    0.7434</td> <td>    0.028</td> <td>   26.294</td> <td> 0.000</td> <td>    0.688</td> <td>    0.799</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Sikh]</th>                              <td>   -0.3810</td> <td>    0.026</td> <td>  -14.846</td> <td> 0.000</td> <td>   -0.431</td> <td>   -0.331</td>
+</tr>
+<tr>
+  <th>C(religion, Treatment('Hindu'))[T.Unknown Religion]</th>                  <td>    0.5480</td> <td>    0.107</td> <td>    5.099</td> <td> 0.000</td> <td>    0.337</td> <td>    0.759</td>
+</tr>
+<tr>
+  <th>C(is_female_headed, Treatment(0))[T.1]</th>                               <td>   -0.0363</td> <td>    0.009</td> <td>   -3.868</td> <td> 0.000</td> <td>   -0.055</td> <td>   -0.018</td>
+</tr>
+<tr>
+  <th>C(hh_head_education, Treatment('No education'))[T.Higher]</th>            <td>   -0.1172</td> <td>    0.014</td> <td>   -8.325</td> <td> 0.000</td> <td>   -0.145</td> <td>   -0.090</td>
+</tr>
+<tr>
+  <th>C(hh_head_education, Treatment('No education'))[T.Primary]</th>           <td>   -0.0184</td> <td>    0.010</td> <td>   -1.809</td> <td> 0.070</td> <td>   -0.038</td> <td>    0.002</td>
+</tr>
+<tr>
+  <th>C(hh_head_education, Treatment('No education'))[T.Secondary]</th>         <td>   -0.0666</td> <td>    0.009</td> <td>   -7.492</td> <td> 0.000</td> <td>   -0.084</td> <td>   -0.049</td>
+</tr>
+<tr>
+  <th>C(hh_head_education, Treatment('No education'))[T.Unknown Education]</th> <td>   -0.0862</td> <td>    0.116</td> <td>   -0.742</td> <td> 0.458</td> <td>   -0.314</td> <td>    0.142</td>
+</tr>
+<tr>
+  <th>C(region, Treatment('North'))[T.Central]</th>                             <td>   -0.4178</td> <td>    0.015</td> <td>  -28.792</td> <td> 0.000</td> <td>   -0.446</td> <td>   -0.389</td>
+</tr>
+<tr>
+  <th>C(region, Treatment('North'))[T.East]</th>                                <td>   -0.7202</td> <td>    0.015</td> <td>  -48.606</td> <td> 0.000</td> <td>   -0.749</td> <td>   -0.691</td>
+</tr>
+<tr>
+  <th>C(region, Treatment('North'))[T.Northeast]</th>                           <td>   -0.2209</td> <td>    0.015</td> <td>  -14.567</td> <td> 0.000</td> <td>   -0.251</td> <td>   -0.191</td>
+</tr>
+<tr>
+  <th>C(region, Treatment('North'))[T.South]</th>                               <td>    0.2872</td> <td>    0.012</td> <td>   23.132</td> <td> 0.000</td> <td>    0.263</td> <td>    0.311</td>
+</tr>
+<tr>
+  <th>C(region, Treatment('North'))[T.Unknown Region]</th>                      <td>   -0.7337</td> <td>    0.014</td> <td>  -52.704</td> <td> 0.000</td> <td>   -0.761</td> <td>   -0.706</td>
+</tr>
+<tr>
+  <th>C(region, Treatment('North'))[T.West]</th>                                <td>    0.4570</td> <td>    0.013</td> <td>   35.129</td> <td> 0.000</td> <td>    0.431</td> <td>    0.482</td>
+</tr>
+<tr>
+  <th>hh_size</th>                                                              <td>    0.0134</td> <td>    0.002</td> <td>    6.761</td> <td> 0.000</td> <td>    0.009</td> <td>    0.017</td>
+</tr>
+<tr>
+  <th>children_under5_count</th>                                                <td>    0.0050</td> <td>    0.005</td> <td>    1.002</td> <td> 0.316</td> <td>   -0.005</td> <td>    0.015</td>
+</tr>
+</table>
