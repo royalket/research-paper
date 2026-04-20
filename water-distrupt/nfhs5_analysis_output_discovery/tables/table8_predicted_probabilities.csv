@@ -1,7 +1,0 @@
-Scenario,Piped Water,Wealth Quintile,Location,IDI Score,Predicted Disruption Prob (%),95% CI Lower (%),95% CI Upper (%)
-Wealthy Urban Piped Water (High IDI),Yes,Richest,Urban,9,,,
-Wealthy Urban Tube Well (Low IDI),No,Richest,Urban,2,,,
-Poor Rural Tube Well (Low IDI),No,Poorest,Rural,1,,,
-Poor Rural Piped Water (Moderate IDI),Yes,Poorest,Rural,5,,,
-Middle Class Urban Piped (High IDI),Yes,Middle,Urban,8,,,
-Middle Class Rural Well (Low IDI),No,Middle,Rural,2,,,

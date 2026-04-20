@@ -208,3 +208,13 @@ __marimo__/
 
 # Local ignored folder for temporary files
 ignored/
+
+#nfhs data
+.DCT
+.DO
+.DTA
+.FRQ
+.FRW
+.MAP
+nfhs/2019-21/
+nfhs/2019–21/

@@ -1,5 +1,0 @@
-Dimension,Indicators,Measurement
-Economic Capital,"Wealth quintile (hv270), Has electricity (hv206), Refrigerator (hv209), Vehicle (hv212)",Composite score (0-10)
-Social Capital,"Household size (hv009), Female-headed (hv219), Rural residence (hv025) (proxy for community ties)",Composite score (0-5)
-Physical Capital,"Water on premises (hv235) (proxy for storage), Has vehicle (hv212), House type (shnfhs2)",Composite score (0-5)
-Knowledge Capital,"HH head education (derived), Rural residence (hv025) (proxy for traditional knowledge)",Composite score (0-5)

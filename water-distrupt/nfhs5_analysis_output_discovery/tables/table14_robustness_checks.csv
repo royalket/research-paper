@@ -1,5 +1,0 @@
-Test,Variable,OR,CI_lower,CI_upper,p_value
-Demand Effect Test,Piped Water (vs Non-Piped),2.58,2.54,2.62,<0.001***
-Reporting Bias Test (Objective Disruption),Piped Water (vs Non-Piped),0.93,0.88,0.99,0.02*
-Subgroup Analysis (Urban),Piped Water (vs Non-Piped),2.2,2.14,2.27,<0.001***
-Subgroup Analysis (Rural),Piped Water (vs Non-Piped),2.67,2.63,2.72,<0.001***

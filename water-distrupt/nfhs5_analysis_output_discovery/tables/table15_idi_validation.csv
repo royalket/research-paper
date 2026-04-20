@@ -1,5 +1,0 @@
-Metric,Value,p_value
-Correlation (IDI Score vs Disruption),0.17,<0.001***
-ROC AUC (IDI Score predicting Disruption),0.61,
-Correlation (IDI Score vs Wealth Score),0.4,<0.001***
-Correlation (IDI Score vs Urban),0.4,<0.001***

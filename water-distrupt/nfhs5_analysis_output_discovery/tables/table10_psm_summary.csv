@@ -1,7 +1,0 @@
-Description,Value
-Number of Treated Households (Piped Water),309882.0
-Number of Control Households (Tube Well),212187.0
-Number of Matched Treated Households,309882.0
-Number of Matched Control Households,309882.0
-Percentage of Treated Households Successfully Matched,100.0
-Caliper Used (Propensity Score Diff),0.05
