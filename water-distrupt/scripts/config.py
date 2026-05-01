@@ -1,12 +1,19 @@
 """
 config.py
 ─────────────────────────────────────────────────────────────────────────────
-Single source of truth for ALL constants, paths, variable names, and mappings.
+Single source of truth for ALL constants, paths, variable names, mappings.
 
 Rules:
   - NO logic here. Only data.
   - When NFHS-6 arrives, only this file changes.
   - When you move servers, only OUTPUT_DIR changes.
+
+Changes from v1:
+  - MONTE_CARLO_RUNS reduced 1000 → 500  (sufficient for 95% CI convergence)
+  - Added MIN_DISTRICT_PIPED_N  (stage-1 slope filter)
+  - Added MONSOON_MONTHS         (shared by RGI aggregation + MC formula)
+  - Added SLOPE_MODEL_MIN_OBS   (minimum observations per district-regression)
+  - Added GEE_CORRELATION        (drives MultilevelModel cov structure)
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -24,40 +31,34 @@ class Config:
 
     # ─── NFHS-5 Core Variable Names ───────────────────────────────────────
 
-    # Outcome
-    VAR_DISRUPTED_RAW:   str = "sh37b"       # Raw disruption question (1=yes, 0=no, 8/9=missing)
-    VAR_DISRUPTED:       str = "water_disrupted"  # Cleaned binary outcome we create
+    VAR_DISRUPTED_RAW:   str = "sh37b"
+    VAR_DISRUPTED:       str = "water_disrupted"
 
-    # Survey design
     VAR_WEIGHT:   str = "hv005"
     VAR_PSU:      str = "hv021"
     VAR_STRATUM:  str = "hv022"
     VAR_CLUSTER:  str = "hv001"
 
-    # Geography
     VAR_STATE:    str = "hv024"
     VAR_DISTRICT: str = "shdist"
-    VAR_URBAN:    str = "hv025"   # 1=Urban, 2=Rural
+    VAR_URBAN:    str = "hv025"
     VAR_PLACE:    str = "hv026"
 
-    # Water
-    VAR_SOURCE_PRIMARY:   str = "hv201"   # Primary drinking water source
-    VAR_SOURCE_ALT:       str = "hv202"   # Alternative / other source
-    VAR_TIME_TO_WATER:    str = "hv204"   # Minutes (996 = on premises)
-    VAR_WATER_LOCATION:   str = "hv235"   # 1=In dwelling, 2=In yard, 3=Elsewhere
-    VAR_FETCHER_MAIN:     str = "hv236"   # Who fetches water (1=adult woman, 2=man, 3=child)
-    VAR_FETCHER_CHILD:    str = "hv236a"  # Child fetcher detail (may not exist)
+    VAR_SOURCE_PRIMARY:   str = "hv201"
+    VAR_SOURCE_ALT:       str = "hv202"
+    VAR_TIME_TO_WATER:    str = "hv204"
+    VAR_WATER_LOCATION:   str = "hv235"
+    VAR_FETCHER_MAIN:     str = "hv236"
+    VAR_FETCHER_CHILD:    str = "hv236a"
 
-    # Socioeconomic
-    VAR_WEALTH_QUINTILE:  str = "hv270"   # 1=Poorest … 5=Richest
-    VAR_WEALTH_SCORE:     str = "hv271"   # Continuous wealth score
+    VAR_WEALTH_QUINTILE:  str = "hv270"
+    VAR_WEALTH_SCORE:     str = "hv271"
     VAR_HH_SIZE:          str = "hv009"
     VAR_CHILDREN_U5:      str = "hv014"
-    VAR_HEAD_SEX:         str = "hv219"   # 1=Male, 2=Female
+    VAR_HEAD_SEX:         str = "hv219"
     VAR_RELIGION:         str = "sh47"
     VAR_CASTE:            str = "sh49"
 
-    # Assets / infrastructure
     VAR_ELECTRICITY:  str = "hv206"
     VAR_RADIO:        str = "hv207"
     VAR_TV:           str = "hv208"
@@ -68,20 +69,18 @@ class Config:
     VAR_LANDLINE:     str = "hv221"
     VAR_MOBILE:       str = "hv243a"
     VAR_TOILET:       str = "hv205"
-    VAR_HOUSE_TYPE:   str = "shnfhs2"    # 1=Pucca, 2=Semi-pucca, 3=Katcha
+    VAR_HOUSE_TYPE:   str = "shnfhs2"
 
-    # Interview timing
     VAR_MONTH:  str = "hv006"
     VAR_YEAR:   str = "hv007"
     VAR_CMC:    str = "hv008"
 
-    # ─── Codes treated as missing ─────────────────────────────────────────
+    # ─── Missing codes ────────────────────────────────────────────────────
     MISSING_CODES: List[int] = field(default_factory=lambda: [
         8, 9, 98, 99, 998, 999, 9996, 9998, 9999
     ])
 
-    # ─── Water source grouping ────────────────────────────────────────────
-    # Maps raw hv201/hv202 codes → human-readable category
+    # ─── Water source mapping ─────────────────────────────────────────────
     WATER_SOURCE_MAP: Dict[int, str] = field(default_factory=lambda: {
         11: "Piped Water", 12: "Piped Water",
         13: "Piped Water", 14: "Piped Water",
@@ -98,24 +97,14 @@ class Config:
         96: "Other Source",
     })
 
-    # Groups used for the Finding 1 dot-plot ordering
-    # (ordered worst → best historically, so piped standing out is visible)
     SOURCE_ORDER: List[str] = field(default_factory=lambda: [
-        "Surface Water",
-        "Unprotected Well/Spring",
-        "Unprotected Spring",
-        "Tanker/Cart",
-        "Piped Water",           # ← paradox: should be low, often is high
-        "Rainwater",
-        "Community RO Plant",
-        "Protected Well/Spring",
-        "Protected Spring",
-        "Tube Well/Borehole",
-        "Bottled Water",
-        "Other Source",
+        "Surface Water", "Unprotected Well/Spring", "Unprotected Spring",
+        "Tanker/Cart", "Piped Water", "Rainwater", "Community RO Plant",
+        "Protected Well/Spring", "Protected Spring",
+        "Tube Well/Borehole", "Bottled Water", "Other Source",
     ])
 
-    # ─── Geography mappings ───────────────────────────────────────────────
+    # ─── Geography ────────────────────────────────────────────────────────
     STATE_NAMES: Dict[int, str] = field(default_factory=lambda: {
         1:  "Jammu & Kashmir",    2:  "Himachal Pradesh",
         3:  "Punjab",             4:  "Chandigarh",
@@ -153,24 +142,28 @@ class Config:
         "Post-monsoon": [10, 11],
     })
 
+    # ─── NEW: Monsoon months (shared by RGI aggregation + MC formula) ─────
+    MONSOON_MONTHS: List[int] = field(default_factory=lambda: [6, 7, 8, 9])
+
     # ─── Analysis parameters ──────────────────────────────────────────────
     ALPHA:               float = 0.05
-    MIN_DISTRICT_N:      int   = 100    # min households for district to appear in RGI
-    MONTE_CARLO_RUNS:    int   = 1000
-    MONTE_CARLO_NOISE:   float = 0.3    # std of Gaussian noise on dimension scores
+    MIN_DISTRICT_N:      int   = 100   # min HH for district to appear in RGI
+    MIN_DISTRICT_PIPED_N: int  = 50    # NEW: min piped-HH for slope-as-outcome
+    SLOPE_MODEL_MIN_OBS: int   = 30    # NEW: min obs for per-district logit
+    MONTE_CARLO_RUNS:    int   = 500   # REDUCED from 1000 — CI stable at 500
+    MONTE_CARLO_NOISE:   float = 0.3
     MONTE_CARLO_SEED:    int   = 42
     PSM_CALIPER:         float = 0.05
     PSM_N_NEIGHBORS:     int   = 1
+    GEE_CORRELATION:     str   = "exchangeable"  # NEW: for MultilevelModel
 
-    # ─── Columns to load from .dta (extended in __post_init__) ────────────
+    # ─── Columns to load from .dta ────────────────────────────────────────
     COLS_TO_LOAD: List[str] = field(default_factory=list)
 
     def __post_init__(self):
-        # Build output sub-dirs
         for sub in ["tables", "figures", "results"]:
             (self.OUTPUT_DIR / sub).mkdir(parents=True, exist_ok=True)
 
-        # Base columns always needed
         base = [
             self.VAR_WEIGHT, self.VAR_PSU, self.VAR_STRATUM, self.VAR_CLUSTER,
             self.VAR_STATE, self.VAR_DISTRICT, self.VAR_URBAN, self.VAR_PLACE,
@@ -187,7 +180,6 @@ class Config:
             self.VAR_TOILET, self.VAR_HOUSE_TYPE,
             self.VAR_MONTH, self.VAR_YEAR, self.VAR_CMC,
         ]
-        # Add hv101_XX and hv106_XX for HH head education derivation
         for i in range(1, 16):
             base.append(f"hv101_{i:02d}")
             base.append(f"hv106_{i:02d}")
