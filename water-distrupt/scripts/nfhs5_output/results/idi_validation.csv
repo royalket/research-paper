@@ -1,0 +1,5 @@
+Check,Metric,Value,p-value,Target,Pass
+Predictive validity,Pearson r (IDI vs Disruption),0.181,<0.001,r > 0,✓
+Predictive validity,ROC-AUC,0.623,—,> 0.60,✓
+Discriminant validity,Pearson r (IDI vs Wealth Score),0.26,<0.001,|r| < 0.50,✓
+Known-groups validity,Mean IDI: Piped vs Tube Well (difference),55.996,—,Piped > Tube Well,✓

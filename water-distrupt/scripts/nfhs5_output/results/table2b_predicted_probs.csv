@@ -1,0 +1,5 @@
+Scenario,Predicted Prob (%)
+A: Rich Urban Piped (IDI=80),31.9
+B: Rich Urban Non-Piped (IDI=20),16.6
+C: Poor Rural Piped (IDI=50),30.4
+D: Poor Rural Tube Well (IDI=15),17.2

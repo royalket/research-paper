@@ -1,0 +1,2 @@
+Metric,Estimate (pp),SE,95% CI Lower,95% CI Upper,% boots > 0,Interpretation
+ATT,15.06,0.13,14.77,15.31,100.0,Piped INCREASES disruption vs matched tube-well

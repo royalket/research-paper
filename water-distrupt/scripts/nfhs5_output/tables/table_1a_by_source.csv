@@ -1,0 +1,12 @@
+,Water Source,Weighted N (000s),Disruption Rate (%),95% CI Lower,95% CI Upper,Relative Risk vs Tube Well
+0,Piped Water,304.5,25.5,25.2,25.7,2.43
+1,Tanker/Cart,5.5,24.2,22.7,25.8,2.3
+2,Surface Water,2.0,23.3,21.0,25.5,2.22
+3,Protected Spring,1.2,22.9,20.3,25.4,2.18
+4,Unprotected Spring,0.6,19.8,16.9,22.8,1.89
+5,Other Source,1.1,18.1,15.0,21.3,1.72
+6,Community RO Plant,4.9,17.7,16.3,19.2,1.69
+7,Protected Well/Spring,17.5,16.8,16.1,17.6,1.6
+8,Unprotected Well/Spring,7.3,13.3,12.4,14.1,1.27
+9,Bottled Water,13.0,10.7,9.8,11.6,1.02
+10,Tube Well/Borehole,229.2,10.5,10.3,10.6,1.0
