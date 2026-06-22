@@ -30,6 +30,29 @@ Prioritize first-impression quality (figures/tables/layout), logical flow, and e
 8. Use readable, minimal-ink tables.
 9. Keep formatting consistent and tidy.
 
+## Human Style Guardrails
+
+Use these rules whenever drafting or rewriting text so the prose reads natural, specific, and reviewer-friendly.
+
+1. Write in clear, direct academic language; avoid stiff template-like phrasing.
+2. Prefer specific verbs and concrete nouns over vague filler words.
+3. Vary sentence length and rhythm; avoid repeating the same sentence pattern.
+4. Use natural transitions that show logic (because, however, therefore, in contrast, as a result).
+5. Prefer active voice when it improves clarity; use passive voice only when focus should stay on the process or result.
+6. Avoid exaggerated claims and hype words (novel, groundbreaking, revolutionary) unless evidence strongly supports them.
+7. Avoid generic AI-style padding (it is important to note that, in order to, this paper aims to).
+8. Keep claims concrete and measurable wherever possible.
+
+## Anti-Robotic Quick Check
+
+Before returning a revised paragraph, verify all points below.
+
+1. Can this sentence be made shorter without losing meaning?
+2. Did I use any repetitive transition or phrase more than once in the paragraph?
+3. Is each claim tied to a specific mechanism, result, or citation?
+4. Would a domain reviewer read this as precise rather than promotional?
+5. Does the paragraph still sound natural when read aloud?
+
 ## Paragraph Clarity Check (Important)
 
 Use this quick test whenever the user asks whether a paragraph "flows" or is clear.
@@ -61,7 +84,7 @@ Load only the needed section file:
 - Method: `references/method.md`
 - Experiments: `references/experiments.md`
 - Conclusion: `references/conclusion.md`
-- Paper review (Paper Rview): `references/paper-review.md`
+- Paper review (Paper Review): `references/paper-review.md`
 - Paragraph clarity source: `references/does-my-writing-flow-source.md`
 - Example bank index: `references/examples/index.md`
 
@@ -88,6 +111,7 @@ Use `references/paper-review.md` for the full checklist and workflow.
 5. If a claim cannot be supported by results, weaken or remove the claim.
 6. Before finalizing, append and answer a five-dimension self-review question list, then revise the paper based on unresolved items.
 7. Do not load all section references (Introduction/Abstract/Related Work/Method/Experiments/Conclusion) at once; load only the specific section guide needed for the current edit target.
+8. Enforce Human Style Guardrails and pass the Anti-Robotic Quick Check before final output.
 
 ## Output Contract
 
