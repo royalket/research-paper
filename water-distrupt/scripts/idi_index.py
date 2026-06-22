@@ -128,46 +128,47 @@ def score_dim3_system_dependency(df: pd.DataFrame) -> pd.Series:
 
 def score_dim4_coping_buffer(df: pd.DataFrame) -> pd.Series:
     """
-    Dimension 4 — Net Coping Buffer (NEGATIVE VALENCE).
+    Dimension 4 — Coping Deficit (POSITIVE VALENCE, lock-in consistent).
 
     Absorbs the old CCI economic + physical capital components.
-    High score = strong ability to cope with disruption.
-    This dimension is NEGATED before PCA entry so it LOWERS IDI.
+    Recoded so that LOW coping capacity = HIGH score (more locked in),
+    consistent with Dims 1, 2, 3. This fixes the negative Cronbach alpha
+    caused by the previous negation approach.
 
-    Rationale: lock-in is only harmful if the household cannot cope.
-    A wealthy household with a fridge and a vehicle can store water
-    and fetch from alternatives. A poor household with no assets cannot.
-    Including coping capacity converts IDI from "lock-in" to
-    "net vulnerability" — a more defensible theoretical construct.
+    Formula: dim4_lockedness = MAX_BUFFER − buffer_score
+    where buffer_score = wealth_map + has_fridge + has_vehicle  (0–5 raw)
+    capped to 0–3, so dim4_lockedness is also 0–3.
 
     Score │ Situation
     ──────┼──────────────────────────────────────────────────────────
-      0–3 │ Wealth quintile: 1→0, 2→0, 3→1, 4→2, 5→3
-      0–1 │ Has fridge (physical water storage proxy)
-      0–1 │ Has vehicle (fetching mobility from alternative source)
-    Clipped to [0, 3]. Negated → idi_dim4_neg = −score.
+      3   │ Poorest wealth, no fridge, no vehicle — zero coping buffer
+      2   │ Lower-middle wealth, one asset
+      1   │ Middle wealth or two assets
+      0   │ Richer/richest, fridge AND vehicle — strong buffer
 
-    Validation signal: PCA loading on dim4_neg should be POSITIVE
-    (consistent with other lock-in dims). If it loads negatively,
-    that means coping genuinely pulls AGAINST lock-in — confirming
-    the theoretical case for including it.
+    Interpretation: enters PCA the same direction as Dims 1, 2, 3.
+    High score = household is structurally unable to cope with disruption.
+    PCA loading should be positive (validated against other dims).
     """
-    scores = pd.Series(0.0, index=df.index)
+    buffer = pd.Series(0.0, index=df.index)
 
-    # Wealth: richer quintiles have more coping capacity
+    # Wealth: richer quintiles have more coping capacity → lower lockedness
     wq_buffer = {1: 0, 2: 0, 3: 1, 4: 2, 5: 3}
     if "wealth_q_num" in df.columns:
-        scores += df["wealth_q_num"].map(wq_buffer).fillna(0)
+        buffer += df["wealth_q_num"].map(wq_buffer).fillna(0)
 
-    # Fridge: can store treated / purchased water
+    # Fridge: physical water storage proxy
     if "has_fridge" in df.columns:
-        scores += df["has_fridge"].fillna(0)
+        buffer += df["has_fridge"].fillna(0)
 
-    # Vehicle: can fetch from alternative source if primary fails
+    # Vehicle: fetching mobility from alternative source
     if "has_vehicle" in df.columns:
-        scores += df["has_vehicle"].fillna(0)
+        buffer += df["has_vehicle"].fillna(0)
 
-    return scores.clip(0, 3)
+    buffer = buffer.clip(0, 3)
+
+    # Invert: high buffer → low lock-in score (0), no buffer → high (3)
+    return 3.0 - buffer
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -176,8 +177,8 @@ def score_dim4_coping_buffer(df: pd.DataFrame) -> pd.Series:
 
 def fit_pca(dim_df: pd.DataFrame) -> Tuple[PCA, StandardScaler, np.ndarray]:
     """
-    Fit PCA on the four dimension scores.
-    dim_df columns must already include idi_dim4_neg (negated).
+    Fit PCA on the four positive-valence dimension scores.
+    All dims run 0–3 where higher = more locked in / less able to cope.
 
     Returns: pca, scaler, loadings (shape 4,)
     """
@@ -195,7 +196,13 @@ def fit_pca(dim_df: pd.DataFrame) -> Tuple[PCA, StandardScaler, np.ndarray]:
     for name, w in zip(dim_df.columns, loadings):
         print(f"      {name:35s}: {w:+.4f}")
     print(f"    Variance explained by PC1: {explained_var*100:.1f}%")
-    print(f"    {'✓ Dim4 loading positive — coping offsets lock-in as expected' if loadings[3] > 0 else '⚠ Dim4 loading negative — review coping buffer scoring'}")
+
+    all_positive = all(l > 0 for l in loadings)
+    if all_positive:
+        print(f"    ✓ All loadings positive — all dims consistent lock-in direction")
+    else:
+        neg_dims = [dim_df.columns[i] for i, l in enumerate(loadings) if l < 0]
+        print(f"    ⚠ Negative loadings on: {neg_dims} — review scoring direction")
 
     return pca, scaler, loadings
 
@@ -438,19 +445,19 @@ class IDIBuilder:
     Call .build() → returns df with IDI columns attached.
 
     New columns added:
-      idi_dim1        : Source lock-in (0-3)
-      idi_dim2        : Access complexity (0-3)
-      idi_dim3        : System dependency (0-3)
-      idi_dim4_neg    : Coping buffer, negated (0 = strong coper, -3 = none)
-      idi_raw_pca     : Raw PCA projection
-      idi_mean        : Mean IDI across MC runs, normalised 0-100
-      idi_ci_lower    : 2.5th percentile across MC runs
-      idi_ci_upper    : 97.5th percentile
-      idi_ci_width    : CI width (higher = more uncertain)
+      idi_dim1     : Source lock-in (0–3, high = more locked in)
+      idi_dim2     : Access complexity (0–3, high = less fetching experience)
+      idi_dim3     : System dependency (0–3, high = market dependent)
+      idi_dim4     : Coping deficit (0–3, high = low coping capacity)
+      idi_raw_pca  : Raw PCA projection (first PC, all dims positive valence)
+      idi_mean     : Mean IDI across MC runs, normalised 0–100
+      idi_ci_lower : 2.5th percentile across MC runs
+      idi_ci_upper : 97.5th percentile
+      idi_ci_width : CI width (higher = more uncertain)
     """
 
-    # Dim 4 is negated BEFORE passing to PCA so its loading is interpretable
-    DIM_COLS = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4_neg"]
+    # All four dims are positive-valence lock-in scores (0–3 each)
+    DIM_COLS = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4"]
 
     def __init__(self, df: pd.DataFrame, cfg: Config):
         self.df          = df.copy()
@@ -466,13 +473,12 @@ class IDIBuilder:
         print("STEP 3 — Building IDI (4 dims + PCA + Monte Carlo)")
         print("=" * 60)
 
-        # 1. Score dimensions
-        self.df["idi_dim1"]    = score_dim1_source_diversity(self.df)
-        self.df["idi_dim2"]    = score_dim2_access_complexity(self.df)
-        self.df["idi_dim3"]    = score_dim3_system_dependency(self.df)
-        # Dim 4: compute buffer score, then negate
-        buffer                 = score_dim4_coping_buffer(self.df)
-        self.df["idi_dim4_neg"] = -buffer   # negative valence for PCA
+        # 1. Score dimensions (all positive-valence: higher = more locked in)
+        self.df["idi_dim1"] = score_dim1_source_diversity(self.df)
+        self.df["idi_dim2"] = score_dim2_access_complexity(self.df)
+        self.df["idi_dim3"] = score_dim3_system_dependency(self.df)
+        # Dim 4: coping deficit — 3 minus buffer, so poorest/no-assets = 3
+        self.df["idi_dim4"] = score_dim4_coping_buffer(self.df)
 
         # Internal consistency
         alpha = cronbach_alpha(self.df, self.DIM_COLS)
@@ -565,4 +571,5 @@ class IDIBuilder:
             "Contribution (%)": (
                 self.loadings**2 / (self.loadings**2).sum() * 100
             ).round(1),
+            "Direction": ["↑ lock-in" for _ in self.DIM_COLS],
         })

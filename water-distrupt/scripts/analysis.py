@@ -484,7 +484,7 @@ class MultilevelModel:
                 family=sm.families.Binomial(),
                 cov_struct=sm.cov_struct.Exchangeable(),
                 weights=df_reg["weight"],
-            ).fit(disp=False)
+            ).fit()
             self.result = model
         except Exception as e:
             print(f"  ✗  GEE failed: {e}")

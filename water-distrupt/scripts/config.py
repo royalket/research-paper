@@ -26,7 +26,7 @@ from typing import Dict, List
 class Config:
 
     # ─── Paths ────────────────────────────────────────────────────────────
-    DATA_FILE_PATH: Path = Path("/Users/kumar.aniket/Downloads/surveydata/IAHR7EFL.DTA")
+    DATA_FILE_PATH: Path = Path("/Users/kumar.aniket/Documents/repos/personal/research-paper/nfhs/2019–21/IAHR7EFL.DTA")
     OUTPUT_DIR:     Path = Path("./nfhs5_output")
 
     # ─── NFHS-5 Core Variable Names ───────────────────────────────────────

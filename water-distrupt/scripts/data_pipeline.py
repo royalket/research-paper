@@ -126,8 +126,21 @@ class DataProcessor:
         else:
             self.df["water_on_premises"] = 0
 
+        # Apply missing codes to all numeric columns EXCEPT interview timing
+        # variables (hv006=month, hv007=year, hv008=CMC) because valid values
+        # for those variables overlap with missing codes:
+        #   hv006 month 8 = August,  9 = September  (both in MISSING_CODES)
+        #   hv007 year values are 4-digit — safe, but excluded for consistency
+        # Applying MISSING_CODES to hv006 wipes all Aug/Sep households,
+        # producing 100k+ "Unknown" season records.
+        timing_vars = {
+            self.cfg.VAR_MONTH,   # hv006 — 1–12, Aug=8, Sep=9
+            self.cfg.VAR_YEAR,    # hv007 — survey year
+            self.cfg.VAR_CMC,     # hv008 — century month code
+        }
         numeric_cols = self.df.select_dtypes(include=[np.number]).columns
-        self.df[numeric_cols] = self.df[numeric_cols].replace(
+        cols_to_clean = [c for c in numeric_cols if c not in timing_vars]
+        self.df[cols_to_clean] = self.df[cols_to_clean].replace(
             self.cfg.MISSING_CODES, np.nan
         )
 
