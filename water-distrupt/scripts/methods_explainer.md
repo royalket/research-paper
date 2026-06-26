@@ -1,348 +1,824 @@
-# Methods Explainer: Every Calculation, Why We Do It, and What It Means
+# Methods Explainer: Every Calculation, Why We Did It, and How to Read the Results
 
-*This document explains every statistical and computational step in the NFHS-5 Water Paradox analysis. It is written to be understood by a reader with basic statistics knowledge — not assuming familiarity with the specific methods used.*
-
----
-
-## Part 1: The Data Foundation
-
-### 1.1 What is NFHS-5 and why use it?
-
-The National Family Health Survey (NFHS) is India's equivalent of the Demographic and Health Survey (DHS). Round 5 was conducted 2019–21, covering all states and union territories. It is:
-- **Nationally representative**: stratified two-stage cluster sampling ensures every district has enough observations to produce reliable estimates
-- **Weighted**: survey weights (`hv005`) correct for unequal probability of selection. We divide by 10^6 because DHS stores weights as integers multiplied by 10^6.
-- **Detailed on water**: it asks not just what source households use, but whether it was disrupted, where it is located, how long it takes to reach, and who fetches it — exactly the variables we need for IDI
-
-**Why survey weights matter**: Without weights, our estimates would over-represent states where more households were sampled. A disruption rate calculated without weights would not represent the true national disruption experience.
-
-### 1.2 The outcome variable: water_disrupted (sh37b)
-
-**What it is**: A binary variable (1 = yes, 0 = no) answering "In the last 12 months, did your household experience a disruption in its water supply?"
-
-**Why it is binary and what that means**: Disruption is a 0/1 event per household. This means we use logistic regression (not linear regression) for all individual-level models, because the outcome is a probability bounded between 0 and 1.
-
-**What we lose**: Duration, frequency, and severity of disruption are collapsed into a single bit. A household disrupted for one day is coded the same as one disrupted for three months. This is a limitation of the data, not the analysis. We note it in the paper but cannot address it without additional data.
-
-**Missing value handling**: Responses coded 8 (don't know) or 9 (missing) are dropped from the analysis sample. We report how many households are dropped and check that the drop rate does not differ systematically by wealth or water source (which would introduce selection bias).
+*This document explains the full analytical pipeline from raw NFHS-5 data to final paper tables.
+It is written so that someone with basic statistics knowledge can understand every decision —
+not just what we did, but why, and what the output numbers actually mean.*
 
 ---
 
-## Part 2: The Infrastructure Dependency Index (IDI)
+## The Big Picture: Why This Analysis Exists
 
-### 2.1 Why build a composite index at all?
+India's Jal Jeevan Mission is connecting every rural household to piped water, operating on the
+assumption that piped = better. Our analysis asks a simple question: **is piped water actually
+more reliable than what households had before?**
 
-We could simply put piped_flag, time_to_water, and wealth into the regression separately. The problem is:
-
-1. **Conceptual**: The paradox mechanism is about a *type of household* — one that is locked in. No single variable captures this. Piped water alone does not tell you whether the household has a backup. Time-to-water alone does not tell you whether the household is piped. We need a composite.
-
-2. **Statistical**: A composite reduces the multiple-testing problem. Instead of running 12 separate tests on each dimension and worrying about Type I error inflation, we test one well-constructed index.
-
-3. **Policy**: An index is actionable. A policymaker can target "households with IDI > 70" in a way they cannot target "households that are piped AND have water in the dwelling AND have no alternative AND are in the bottom three wealth quintiles."
-
-### 2.2 Dimension 1: Source Lock-in
-
-**What it measures**: Whether the household has any meaningful alternative if its primary source fails.
-
-**The scoring logic**:
-- Score 3: Piped water as primary source, AND either no alternative source OR another piped source as alternative. This household has zero fallback outside the same failing system.
-- Score 2: Piped water primary, but a non-piped alternative exists. The household can escape the piped system if it fails, but normally doesn't.
-- Score 1: Non-piped primary source but only the same type of alternative (e.g., two different tube wells). Some diversity, but limited — both could fail for the same reason (e.g., groundwater depletion).
-- Score 0: Non-piped primary with a genuinely different type of alternative. Maximally diversified.
-
-**Why this matters**: This is the core of the paradox mechanism. A household that is 100% dependent on a single centralised system cannot cope when that system fails. The diversity-resilience relationship is well-established in ecology; we apply it to water supply systems.
-
-**Variable used**: `hv201` (primary source) and `hv202` (alternative/other source).
-
-### 2.3 Dimension 2: Access Complexity (Inverted)
-
-**What it measures**: The household's *experience* with fetching water — and therefore its preparedness for disruption.
-
-**The inversion**: Traditional vulnerability indices treat long walk times as a sign of vulnerability (the household has to work hard to get water). We invert this. A household that already walks 30 minutes to fetch water every day has:
-- Established routes to alternative sources
-- Containers appropriate for carrying water
-- Physical capacity for fetching
-- Knowledge of which sources are open when
-
-When disruption hits, this household barely changes behaviour. The household with in-dwelling piped water has none of these — it is completely unprepared.
-
-**The scoring logic**:
-- Score 3: Water in dwelling (zero fetching experience, maximally unprepared)
-- Score 2: Water in yard or plot (some fetching experience, mostly unprepared)
-- Score 1: Must go elsewhere, < 15 minutes (some experience)
-- Score 0: Must go elsewhere, ≥ 15 minutes (experienced coper)
-
-**Variables used**: `hv235` (water location: 1=in dwelling, 2=in yard, 3=elsewhere) and `hv204` (time to water in minutes; 996 = on premises, recoded to 0).
-
-**Empirical validation of the inversion**: In the data, conditional on water source type, households with longer walk times have *lower* disruption rates. This confirms the inversion is empirically grounded, not merely theoretical.
-
-### 2.4 Dimension 3: Market/System Dependency
-
-**What it measures**: How much the household's coping strategy — when its primary source fails — requires money or formal system access.
-
-**The scoring logic**:
-- Score 3: Primary source is tanker or bottled water. These are expensive, unreliable, and themselves depend on supply chains. When the piped system fails, these households must buy water from vendors who may also raise prices.
-- Score 2: Piped water. The system is managed by a utility that may fail for reasons entirely outside the household's control (pump failure, electricity outage, pipe burst, billing dispute).
-- Score 1: Community RO plant, protected well, or protected spring. Managed sources, but community-level — less subject to centralised failure.
-- Score 0: Own well, rainwater collection, surface water. These may be lower quality but they are self-sufficient — the household controls access.
-
-**Why market dependency amplifies lock-in**: A household whose only coping option is to buy water from a tanker vendor is at the mercy of both the failed piped system AND the vendor's willingness to supply. In genuine water crises, tanker prices spike (documented in Chennai 2019). This is a second-order vulnerability that Dimension 1 alone does not capture.
-
-### 2.5 Dimension 4: Net Coping Buffer (Negative Valence)
-
-**What it measures**: The household's *capacity* to absorb a disruption without severe welfare consequences.
-
-**Why add this**: Dimensions 1–3 all measure structural features of the water system — what type of source, where it is, how dependent you are. They do not measure whether the household can *cope* if disruption occurs. Two households with identical water system profiles may have very different outcomes: one is wealthy with a large fridge stocked with filtered water and a car to fetch from an alternative; the other is poor with no storage and no transport.
-
-**The scoring logic** (0–3, then negated):
-- Wealth quintile: mapped 1→0, 2→0, 3→1, 4→2, 5→3. The bottom two quintiles add nothing to the buffer; the richest adds 3.
-- Refrigerator (`hv209`): adds 1 if owned. A fridge allows storage of several days' worth of water.
-- Vehicle (`hv210`/`hv211`/`hv212`): adds 1 if motorcycle or car is owned. A vehicle allows the household to fetch water from more distant alternatives that are not accessible on foot.
-- Clipped to [0, 3] before negation.
-
-**The negation**: The score is multiplied by −1 before entering PCA. So a household with a strong coping buffer (score = 3) enters PCA as −3, pulling the IDI *down*. A household with no coping buffer (score = 0) enters as 0, providing no offset.
-
-**What we expect from PCA**: If coping genuinely offsets lock-in, the PCA loading on Dim 4 (already negated) should be positive — consistent with Dims 1, 2, 3. If it loads negatively, it means in the data, higher coping is associated with *lower* lock-in (less piped, more traditional sources) — which would still be theoretically coherent but would mean Dim 4 is pulling in a different direction. We report this loading explicitly and discuss its interpretation.
-
-### 2.6 Principal Component Analysis (PCA) for Weighting
-
-**The problem with equal weights**: If we simply add Dims 1 + 2 + 3 + 4 with equal weights, we are assuming each dimension contributes equally to the underlying concept of "infrastructure dependency." There is no reason to believe this. PCA lets the data determine the weights.
-
-**What PCA does**: PCA finds the linear combination of the four standardised dimensions that has the maximum variance across households. This first principal component is the direction in the four-dimensional space along which households are most spread out — which is also the direction that captures the most of what varies between households in terms of water vulnerability.
-
-**Standardisation**: Before PCA, each dimension is standardised to mean 0, standard deviation 1. This is necessary because the dimensions have different natural ranges (all 0–3, but with different distributions). Without standardisation, whichever dimension has the most variance would dominate the PCA.
-
-**The loadings as weights**: The first PC loadings (e.g., Dim1: 0.41, Dim2: 0.38, Dim3: 0.44, Dim4: 0.33 — hypothetical) are the coefficients by which we multiply the standardised dimension scores to get each household's IDI. These are the data-driven weights.
-
-**Variance explained**: If PC1 explains 65% of the variance in the four dimensions, that means 65% of what varies across households in their water system configuration is captured by a single underlying dimension — "infrastructure dependency." We report this.
-
-**Cronbach's alpha**: A supplementary measure of internal consistency. Alpha > 0.7 is conventionally considered "good." With four dimensions, alpha = 0.68 is acceptable. Importantly, if alpha were very low (say, 0.3), it would suggest the four dimensions are not measuring a common underlying construct and should not be combined — we would need to keep them separate.
-
-### 2.7 Monte Carlo Uncertainty Quantification
-
-**The problem**: Our dimension scores are not measured perfectly. The mapping of `hv235` (water location) to a score of 0, 1, 2, or 3 involves judgment calls. The noise parameter σ = 0.3 represents our uncertainty about those scoring thresholds. If the boundary between score 2 and score 3 were shifted slightly, how would the IDI change?
-
-**The procedure** (500 runs):
-1. Add Gaussian noise to each dimension score: `perturbed = clip(dim_score + N(0, 0.3), 0, 3)`
-2. Project perturbed scores through the *fixed* PCA weights (the weights don't change — only the inputs vary)
-3. Record the resulting IDI score for each household
-4. Also fit a logistic regression in each run to record the OR for piped water
-
-**Why NOT refit PCA in each run**: If we refitted PCA each run, we would be changing the weights AND the inputs simultaneously, confounding the two sources of uncertainty. We want to isolate input uncertainty from weighting uncertainty. The PCA is fit once on the observed data.
-
-**What we get**:
-- Per household: mean IDI across 500 runs, 2.5th and 97.5th percentiles → 95% confidence interval on that household's IDI
-- OR(piped) distribution: if piped water OR > 1 in 98% of runs, the finding is robust to dimension scoring uncertainty
-
-**Speed improvements (v2)**:
-- Pre-built positional array: instead of a Python dictionary lookup per row per run (100,000 × 500 = 50 million operations), we pre-compute which position in the full household array each regression-sample row corresponds to. This is done once before the loop. Inside the loop, it's a single NumPy array index.
-- No cluster-robust SE in MC loop: cluster-robust standard errors require computing a "meat" matrix (a sum over PSU groups). This doubles computation per logit fit. In the MC loop, we only need OR point estimates, not their standard errors. Using plain Newton solver cuts each fit by ~60%.
-- In-place update: instead of copying the entire regression DataFrame 500 times (500 × 100,000 rows = 50 million row-copies), we pre-allocate a float array and update it in place each run.
+The answer is no — and the gap is large. Piped water households report disruption at 2.43 times
+the rate of tube-well households. This document explains how we measured that, why we built the
+IDI and RGI indices, what every number in the output means, and where the results are reliable
+versus where caution is needed.
 
 ---
 
-## Part 3: The Reliability Gap Index (RGI)
+## Part 1 — The Data
 
-### 3.1 Why a district-level index?
+### 1.1 What is NFHS-5?
 
-Water supply systems in India are managed at the district or state level. A household's disruption experience is partly a function of its own characteristics (captured by IDI) and partly a function of the system it is plugged into. That system quality varies by district — some districts maintain their infrastructure well, others don't.
+The National Family Health Survey Round 5 (2019–21) is India's equivalent of the Demographic
+and Health Survey. It covers all 28 states and 8 union territories and is the most comprehensive
+nationally representative household survey in India.
 
-If we include district effects only as fixed effects in the regression, we cannot identify what *district characteristics* explain variation in disruption. The RGI gives us a single district-level measure that we can then interact with IDI.
+**Key facts about the dataset:**
+- Full sample: 636,699 households
+- Our analysis sample: 578,062 households (after dropping 58,637 with missing disruption answers)
+- Survey design: stratified two-stage cluster sampling — districts are strata, villages/urban
+  blocks are primary sampling units (PSUs), households are selected within PSUs
+- Nationally representative: the sampling design ensures every region and wealth group is
+  proportionally covered
 
-### 3.2 The Expected-Disruption Model
+### 1.2 Survey Weights — Why We Use Them
 
-**Goal**: Predict, for each district, what disruption rate we would expect given its socioeconomic development level — if its infrastructure performed normally.
+Not every household has an equal probability of being selected. Urban households in small states
+may be oversampled to ensure enough observations for state-level estimates. If we counted every
+household equally, our national disruption rate would be wrong — it would over-represent
+oversampled groups.
 
-**Features used** in the OLS:
-1. `mean_wealth_score`: wealthier districts have more resources to cope with disruption (demand-side)
-2. `pct_urban`: urban areas have more complex networks but also more resources
-3. `improved_coverage`: districts with more improved-source access should have lower disruption
-4. `piped_coverage` *(new in v2)*: controls for saturation bias. A district with 90% piped coverage mechanically has more households exposed to piped-system failure. Without this control, high-coverage districts look like "infrastructure underperformers" when they are really just more exposed.
-5. `pct_monsoon` *(new in v2)*: the fraction of households in the district surveyed during monsoon months (June–September). Monsoon disruptions (flooding, contamination) are different from dry-season supply shortfalls. Districts surveyed more during monsoon will have higher observed disruption for a mechanical reason unrelated to infrastructure quality. This controls for that.
+**The weight variable is `hv005`.** DHS stores it as an integer multiplied by 1,000,000 to avoid
+decimals. We divide by 1,000,000 to get the actual weight.
 
-**Weighted OLS**: The regression is weighted by `n_households` in each district. This means districts with 3,000 households have 30× more influence on the regression line than districts with 100 households. The large districts have more reliable observed disruption rates, so this is methodologically sound.
+**What a weight means:** If household A has weight 1.8 and household B has weight 0.7, household A
+represents 1.8 / 0.7 ≈ 2.6 times as many real households in the population as household B. When
+we compute a weighted disruption rate, we are computing the rate that represents the actual Indian
+population, not just our sample.
 
-**What R² tells us**: If R² = 0.54, that means 54% of variation in district disruption rates is explained by socioeconomic development alone. The remaining 46% is what the RGI captures — the "extra" disruption not explained by poverty, urbanisation, or coverage.
+**Every rate, mean, and percentage in this paper is weighted.**
 
-### 3.3 RGI = Observed − Expected
+### 1.3 The Outcome Variable: `water_disrupted`
 
-**Interpretation**:
-- RGI = +20 pp: This district's disruption rate is 20 percentage points higher than its development level predicts. Its infrastructure is severely underperforming.
-- RGI = −10 pp: This district's disruption rate is 10 pp lower than predicted. Its infrastructure is outperforming — possibly because of better O&M, stronger community management, or both.
-- RGI ≈ 0: Performing as predicted.
+**Raw variable:** `sh37b` — "Was water not available for at least one day in the past two weeks?"
 
-**Why this is better than observed disruption alone**: A district with 50% disruption in a poor rural area might just have a lot of poor households. A district with 50% disruption in a wealthy urban area has a severe infrastructure problem. The RGI separates these.
+**Our coding:**
+- `sh37b = 1` → `water_disrupted = 1` (disrupted)
+- `sh37b = 0` → `water_disrupted = 0` (not disrupted)
+- `sh37b = 8 or 9` (don't know / missing) → **dropped from sample**
 
-### 3.4 Bootstrap Confidence Intervals on RGI
+**Why binary?** Disruption is an event — it either happened or it didn't in the recall period.
+Binary outcomes require logistic regression, not linear regression, because the predicted
+probability must stay between 0 and 1.
 
-**The problem**: The RGI point estimate (RGI = observed − expected) has uncertainty because the expected-disruption OLS is fit on a sample of districts, not the population of districts. If we had a different sample of districts, the OLS line would be slightly different, and all RGI values would shift.
+**What we lose:** We cannot distinguish one day of disruption from two weeks. A household with
+a single missed hour is coded the same as one with two weeks of no water. This is a limitation
+of the survey, not the analysis. We note it in the paper.
 
-**The procedure** (200 bootstrap reps):
-1. Draw a bootstrap sample of districts (with replacement, same N)
-2. Refit the OLS on the bootstrap sample
-3. Compute predicted (expected) disruption for all districts using the bootstrap OLS
-4. Compute bootstrap RGI = observed − bootstrap expected
-5. After 200 reps, take the 2.5th and 97.5th percentiles of RGI for each district
+### 1.4 Water Source Codes — Why We Split Piped Into Sub-Types
 
-**Result**: Each district gets a 95% CI on its RGI. A district with RGI = 15, CI [12, 18] is clearly a "Severe Failure" district. A district with RGI = 6, CI [−2, 14] overlaps with "As Expected" — we should classify it cautiously.
+`hv201` is the primary water source. DHS coding:
 
-### 3.5 Weighted Median for Typology Cut-points
+| Code | Label | n in sample |
+|------|-------|-------------|
+| 11 | Piped into dwelling | 121,879 |
+| 12 | Piped to yard/plot | 97,138 |
+| 13 | Piped to neighbour/shared | 10,689 |
+| 14 | Public tap/standpipe | 80,176 |
+| 21 | Tube well/borehole | 212,187 |
+| 31 | Protected well | 17,088 |
+| 32 | Unprotected well | 10,159 |
+| 41 | Protected spring | 3,255 |
+| 42 | Unprotected spring | 2,324 |
+| 43 | Surface water (river/lake/canal) | 3,030 |
+| 51 | Rainwater | 2,927 |
+| 61 | Tanker truck | 4,660 |
+| 62 | Cart with small tank | 883 |
+| 71 | Bottled water | 8,839 |
+| 92 | Community RO plant | 4,610 |
+| 96 | Other | 1,145 |
 
-**Why weighted median**: When we split districts into high-IDI and low-IDI halves using the median, we want the cut-point to represent the typical household, not the typical district. A simple median treats a district with 100 households the same as one with 5,000.
+**Why we do NOT collapse all piped codes into "Piped Water":** The four piped sub-types have
+very different disruption rates:
 
-**How it works**: Sort districts by IDI. Accumulate n_households weights. The weighted median is the IDI value at which the cumulative household count crosses 50% of total households. This cut-point now divides the population of households, not the population of districts.
+| Sub-type | Disruption % |
+|----------|-------------|
+| Piped — Yard/Plot | **29.7%** |
+| Piped — Neighbour/Shared | 26.1% |
+| Piped — Public Tap/Standpipe | 23.9% |
+| Piped — Into Dwelling | 23.6% |
 
-**Practical effect**: Small, noisy districts with extreme IDI values have less influence on where the quadrant boundaries are drawn.
+Yard/plot connections are at the **periphery of the distribution network** — they experience
+pressure drops and shutdowns first when the system is stressed. Collapsing this variation would
+hide an important finding. We show all sub-types in Table 1a and note this gradient in the paper.
 
-### 3.6 Moran's I Spatial Autocorrelation
-
-**What Moran's I tests**: Whether districts with similar RGI values are geographically clustered. Moran's I = 1 means perfectly clustered (every district surrounded by districts with similar RGI). Moran's I = 0 means random spatial pattern. Moran's I = −1 means perfectly dispersed (every district surrounded by opposites).
-
-**Why we test this**:
-1. *Validation*: Real infrastructure systems (river systems, state water boards, electrical grids) span district boundaries. If RGI is measuring real infrastructure quality, it should cluster geographically. A significant positive Moran's I validates that RGI is capturing genuine spatial variation in system quality, not statistical noise.
-2. *Model assumption warning*: Our GEE and slope-as-outcome models treat district-level RGI values as independent observations. If districts are strongly spatially autocorrelated, standard errors may be under-estimated. We report the Moran's I and note this limitation.
-
-**Using libpysal**: We use k=5 nearest-neighbour spatial weights (based on district code ordering as a proxy — ideally replaced with geographic coordinates). The randomisation-based p-value is computed from permutation tests (999 random reassignments of RGI values).
+**The `piped_flag` variable** = 1 if the household uses any of the four piped codes. This is
+used in regressions where we need a single piped/not-piped contrast.
 
 ---
 
-## Part 4: The Regression Models
+## Part 2 — The Infrastructure Dependency Index (IDI)
 
-### 4.1 IDI Regression (Finding 2)
+### 2.1 Why Build an Index Instead of Just Using Piped Flag?
 
-**Why logistic regression**: The outcome is binary (0/1 disruption). Logistic regression models the log-odds of disruption as a linear function of predictors. The exponentiated coefficient is an Odds Ratio (OR): OR > 1 means higher odds of disruption.
+We could put `piped_flag = 1` in the regression and stop there. The problem is that tells us
+**whether** the paradox exists, but not **why**. Two piped households can have very different
+experiences when the tap runs dry:
 
-**The key interaction term (piped_flag × idi_mean)**:
-This is the central test. Without this term, we would only be asking: "Is piped water associated with higher disruption?" (yes, we know that). With this term, we ask: "Does the disruption penalty of piped water increase as IDI increases?" If the interaction OR > 1, then: among piped households, higher IDI means even higher disruption — the paradox is amplified by lock-in.
+- **Household A:** Piped into dwelling, no alternative source, no vehicle, no refrigerator,
+  poorest wealth quintile. When the tap fails: no experience fetching water, no storage, no
+  money for tankers, no way to get elsewhere.
 
-**Social controls (new in v2)**:
-- `sc_st_flag`: SC/ST households may face water access discrimination or may rely more on community sources. Including this controls for caste-based water access patterns.
-- `female_headed`: Female-headed households often have different time allocation (women fetching water) and different bargaining power with utilities.
-- `C(head_education)`: Education affects knowledge of water quality risks, ability to navigate utility bureaucracy, and income-earning potential.
+- **Household B:** Piped into dwelling, but also has a protected well nearby, a motorcycle,
+  a fridge, and middle-quintile wealth. When the tap fails: fetch from the well with the
+  motorcycle, store water in fridge.
 
-These absorb the old WVI "social component." By including them as controls rather than baking them into the index, we avoid a key conceptual error: caste is not a feature of the *water system's* failure. It is a characteristic of the household that modifies the household's experience of failure. It belongs in the regression as a control, not in the index.
+Both have `piped_flag = 1`. Only Household A is truly "locked in." The IDI captures this
+difference by scoring four dimensions of lock-in and combining them into a single number.
 
-**Cluster-robust standard errors at PSU level**: Households within the same primary sampling unit (village or urban block) are surveyed together and share community-level characteristics. Ignoring this clustering would under-estimate standard errors, producing artificially significant p-values. Clustering at PSU level corrects this.
+**Three reasons for a composite index:**
+1. **Conceptual:** No single variable captures lock-in. We need to combine source diversity,
+   access experience, system dependency, and coping capacity.
+2. **Statistical:** Testing one index avoids inflating Type I error across multiple tests.
+3. **Policy:** "Target households with IDI > 60 in CRISIS districts" is actionable in a way
+   that a list of four separate conditions is not.
 
-### 4.2 GEE Multilevel Model (Finding 4)
+### 2.2 Dimension 1 — Source Lock-in
 
-**The problem with flat logistic regression**: Households within the same district share unmeasured characteristics — the quality of the local water utility, the reliability of the electricity supply that powers pumps, local political investment in infrastructure maintenance. When we ignore this, we violate the independence assumption and under-estimate standard errors.
+**The question it answers:** If the primary source fails, does the household have any
+non-piped backup they can use?
 
-**Why not a random-effects GLMM**: A full random-effects logistic regression (e.g., using lme4 in R) requires distributional assumptions about the random effects (typically normally distributed random intercepts). With 641 districts, these assumptions are difficult to verify and estimation is computationally demanding. Additionally, the parameter estimates from random-effects models are subject-specific (they describe the typical individual's probability) rather than population-averaged (they describe the average probability in the population), which is what we want for policy claims.
+**Why this is the most important dimension (PCA loading: 0.622):** The paradox mechanism
+is fundamentally about lock-in to a single centralised system. A household that has a tube
+well as backup can survive a piped failure. A household that has only piped water — or only
+another piped connection as backup — has nowhere to turn.
 
-**Why GEE**: GEE is a semi-parametric approach that accounts for within-group correlation without specifying a full random-effects distribution. It estimates population-averaged parameters and uses an empirical "sandwich" estimator for standard errors that is robust to mis-specification of the within-district correlation structure. For policy claims ("the average Indian household's probability of disruption increases by X for each unit increase in IDI"), population-averaged estimates are the right estimand.
+**How we score it (0–3, higher = more locked in):**
 
-**Exchangeable correlation structure**: We assume all pairs of households within the same district are equally correlated. The working correlation coefficient α is estimated from the data. If α = 0.18, that means two randomly selected households in the same district have a correlation of 0.18 in their disruption outcomes — substantial enough to matter for inference.
+| Score | Situation | Why this score |
+|-------|-----------|----------------|
+| 3 | Piped primary AND (no alternative OR piped alternative) | Completely dependent on centralised system. If piped fails, nothing. |
+| 2 | Piped primary AND non-piped alternative exists | Has an escape route but doesn't normally use it. Still primarily locked in. |
+| 1 | Non-piped primary AND same-category alternative | Some diversity, but both alternatives could fail for the same reason (e.g., both tube wells during drought). |
+| 0 | Non-piped primary AND different-category alternative | Genuinely diversified. Lowest lock-in. |
 
-**The cross-level interaction (idi_std × rgi_std)**: Both IDI and RGI are standardised (mean 0, SD 1) before the interaction is computed. This makes the interaction coefficient interpretable: it represents the change in log-odds of disruption for a one-SD increase in IDI, for every one-SD increase in RGI. Standardising also reduces multicollinearity between main effects and the interaction term.
+**Variables used:** `hv201` (primary source) → `piped_flag`, `hv202` (alternative source) → `alt_source`
 
-### 4.3 Slope-as-Outcome Model (Finding 5)
+**Data reality:** `hv202` (alternative source) is not recorded for any household in this NFHS-5
+dataset — all households show "No Other Source." This means we cannot distinguish score 2 from
+score 3 for piped households, and score 0 from score 1 for non-piped households. In practice,
+Dim 1 is effectively a binary: piped = 3, non-piped = 0. This is a data limitation we note in
+the paper. Despite this, Dim 1 remains the strongest predictor in the index (r = +0.179 with
+disruption) because the piped/non-piped distinction itself is the core of the paradox.
 
-**The limitation of the GEE interaction**: The interaction term `idi_std × rgi_std` in the GEE model tells us that IDI and RGI jointly predict disruption. But it pools all districts together. It cannot directly answer: "In districts with high RGI, is the IDI effect genuinely steeper?"
+### 2.3 Dimension 2 — Access Complexity
 
-**Stage 1 — District-level IDI slopes**: For each district with at least 50 piped-water households and 30 total observations, we fit:
+**The question it answers:** When the tap fails, does this household have any experience
+fetching water? Can they physically go get water from somewhere else?
 
+**The key insight — why we invert the traditional framing:** In standard vulnerability indices,
+"water in dwelling" is considered a positive outcome (easier access). We argue the opposite
+for disruption preparedness. A household that fetches water daily has:
+- Established physical routes to alternative sources
+- Containers and equipment for carrying water
+- Knowledge of which sources are open and when
+- Physical practice for the task
+
+A household with water piped directly into the dwelling has **none of these**. When the tap
+fails, they are completely unprepared. This is the "access complexity" paradox within the
+main infrastructure paradox.
+
+**How we score it (0–3, higher = more dependent):**
+
+| Score | Situation | Why this score |
+|-------|-----------|----------------|
+| 3 | `water_on_premises = 1` | Water flows to the tap; household has never fetched. Zero coping experience. |
+| 2 | Off-premises, water in yard/plot | Short walk; minimal fetching experience |
+| 1 | Off-premises, elsewhere, < 15 min walk | Regular fetching; some routine established |
+| 0 | Off-premises, elsewhere, ≥ 15 min walk | Experienced daily fetcher; best-prepared for disruption |
+
+**Critical technical note — the pipeline collision fix:**
+
+The NFHS-5 pipeline stores `hv204 = 996` to mean "water is on the premises" (no travel time).
+When loading data, `water_on_premises = 1` is derived from `hv204 == 996`, and then `hv204`
+is replaced with 0 minutes. Separately, `hv235` (water location) is only asked when water is
+*not* on the premises — so all on-premises households have `water_location = "Unknown"`.
+
+In the **old version**, the scorer only looked at `water_location`, which meant 453,254
+on-premises households (78% of all households in the sample) got the default score of 1
+instead of the correct score of 3. This caused Dim 2 to have a **negative** PCA loading
+(−0.419) — the opposite direction from the theory.
+
+In the **current version**, we check `water_on_premises` first. If it equals 1, the household
+scores 3 regardless of `water_location`. Only off-premises households use `water_location`
+and travel time for scoring. This fixed the loading from −0.419 to **+0.128**.
+
+**Why 0.128 is the weakest loading:** Most households (78%) are on-premises and all score 3.
+This creates very little variance in Dim 2 — nearly everyone gets the same score, so the
+dimension adds little discriminating power to the PCA. This is a data structure issue, not a
+conceptual flaw. In a dataset with more variation in water location, Dim 2 would be stronger.
+
+### 2.4 Dimension 3 — System Dependency
+
+**The question it answers:** If the primary source fails, how much does getting water from
+somewhere else depend on formal systems or market access?
+
+**Why market dependency matters:** When a centralised system fails during a genuine crisis
+(summer 2019 Chennai, for example), tanker water prices spike dramatically. A household
+whose only coping option is to buy from a tanker vendor is at the mercy of both the failed
+piped system AND the vendor's willingness to supply at a price they can afford. This is
+a second layer of vulnerability that Dim 1 alone does not capture.
+
+**How we score it (0–3, higher = more dependent):**
+
+| Score | Situation | Why this score |
+|-------|-----------|----------------|
+| 3 | Tanker truck or cart | Pure market — expensive, supply uncertain, prices spike in crises |
+| 2 | Any piped sub-type | Centralised single point of failure — operator-controlled |
+| 1 | Community RO, protected well, protected spring | Semi-managed — community level, less central failure risk |
+| 0 | Own well, rainwater, surface water, tube well | Self-sufficient — household controls access |
+
+**Note on tube well scoring 0:** Tube wells score 0 on System Dependency because a household
+*using a tube well as its primary source* manages it locally — it does not depend on a utility
+or market. This is different from Dim 1, where a piped household with a tube well *backup* scores
+2 (has an escape route). The dimensions measure different things.
+
+**PCA loading: 0.606** — second strongest after Dim 1. Dims 1 and 3 correlate at 0.873 with
+each other because both are largely driven by whether the household uses piped water. They
+are measuring the same piped-dependency from two angles: "do you have a backup?" (Dim 1) and
+"does your primary source make you dependent on formal systems?" (Dim 3).
+
+### 2.5 Dimension 4 — Piped Coping Deficit
+
+**The question it answers:** Among piped households specifically, when the tap fails, can this
+household actually cope — through stored water, mobility, or wealth?
+
+**Why we gate on `piped_flag`:** This is the most important design decision in Dim 4.
+
+In the **old version**, the coping deficit was calculated for all households. But non-piped
+households with no fridge and no vehicle are *not* in deficit — they already fetch water daily.
+They have a practiced routine. Lacking a fridge does not hurt them because they do not need
+storage; they go get fresh water when needed.
+
+The coping deficit concept only applies to households that **depend on a tap** that can fail
+and then suddenly need to cope without their normal supply. That is only piped households.
+
+In the data, this matters:
+- Non-piped: `has_fridge = 0` → 12.1% disruption, `has_fridge = 1` → 13.0% (barely different)
+- Piped only: `has_fridge = 0` → **27.9%** disruption, `has_fridge = 1` → **25.3%** (correct direction)
+
+By gating on `piped_flag`, Dim 4's loading went from **−0.239** (wrong direction) to **+0.478**
+(correct direction) and Cronbach's alpha went from −0.285 to **0.706**.
+
+**How we score it (0–3, higher = more deficit):**
+
+Step 1 — Build the buffer score (what the household has):
+
+| Component | How it contributes |
+|-----------|-------------------|
+| Wealth quintile | Q1 → 0, Q2 → 0, Q3 → 1, Q4 → 2, Q5 → 3 |
+| Has refrigerator (`hv209 = 1`) | +1 (can store several days of water) |
+| Has vehicle (`hv210/211/212 = 1`) | +1 (can fetch from distant alternative) |
+| **Total buffer** | **Clipped to [0, 3]** |
+
+Step 2 — Convert to lock-in score:
+- If `piped_flag = 1`: Coping Deficit = 3 − buffer (high buffer → low deficit → low score)
+- If `piped_flag = 0`: Coping Deficit = **0** (concept does not apply)
+
+**PCA loading: 0.478** — this is now a meaningful positive contributor to the index.
+
+---
+
+## Part 3 — Combining the Dimensions: PCA
+
+### 3.1 Why Not Just Add Them Up?
+
+Adding Dim1 + Dim2 + Dim3 + Dim4 with equal weights assumes each dimension is equally
+important. But we just showed that Dim 1 and Dim 3 have 0.873 correlation — they are almost
+measuring the same thing. Giving them equal weight double-counts the piped-dependency signal.
+PCA avoids this by finding the optimal combination.
+
+### 3.2 What PCA Actually Does — Step by Step
+
+**Step 1 — Standardise each dimension.**
+Each of the four dimension scores (0–3) is converted to mean 0, standard deviation 1.
+This is necessary because without standardisation, a dimension with wider natural spread
+would dominate the PCA regardless of its conceptual importance.
+
+**Step 2 — Build the covariance matrix.**
+A 4×4 matrix showing how much each pair of dimensions varies together across households.
+Entry [1,3] = 0.873 means Dim 1 and Dim 3 are highly correlated.
+
+**Step 3 — Find the eigenvectors.**
+The eigenvectors of the covariance matrix are the directions in 4-dimensional space along
+which households vary the most. The first eigenvector (PC1) points in the direction of
+maximum variance.
+
+**Step 4 — The loadings are the PC1 eigenvector.**
+These are the weights we use:
+
+| Dimension | Loading | What it means |
+|-----------|---------|---------------|
+| Dim 1: Source Lock-in | **+0.622** | Strongest contributor. Piped-without-backup is the core signal. |
+| Dim 2: Access Complexity | **+0.128** | Weakest contributor. Low variance in the data (most HH score 3). |
+| Dim 3: System Dependency | **+0.606** | Second strongest. Closely related to Dim 1. |
+| Dim 4: Piped Coping Deficit | **+0.478** | Meaningful contributor. Captures within-piped heterogeneity. |
+
+**All four loadings are positive.** This confirms all four dimensions point in the same
+direction: higher score = more locked in = more likely to be disrupted. If any loading had
+been negative, it would mean that dimension measured something conceptually inconsistent
+with the others, and we would need to reconsider including it.
+
+**Step 5 — Project each household onto PC1.**
+Each household's IDI (raw) = 0.622 × Dim1_std + 0.128 × Dim2_std + 0.606 × Dim3_std + 0.478 × Dim4_std
+
+This gives a raw score with arbitrary units. We then normalise to 0–100 in each Monte Carlo
+run (see Part 4).
+
+### 3.3 Variance Explained: 57.7%
+
+PC1 explains **57.7%** of the total variance in the four dimensions. This means a single
+underlying dimension — "infrastructure dependency" — captures just over half of what varies
+between households in their water system configuration. The remaining 42.3% is noise or
+genuinely distinct sub-constructs that are orthogonal to the main lock-in dimension.
+
+**Is 57.7% good?** For a 4-item index in social science, this is acceptable. If PC1 explained
+only 30%, the dimensions would be poorly related to a common construct. If it explained 90%,
+the four dimensions would be nearly redundant.
+
+### 3.4 Cronbach's Alpha: 0.706
+
+Cronbach's alpha measures internal consistency — are the four dimensions measuring the same
+underlying thing?
+
+**Formula:** α = (k / (k−1)) × (1 − Σ item variances / total score variance)
+
+**Interpretation:**
+- α < 0.5: Poor — dimensions are not measuring a common construct. Do not combine them.
+- 0.5–0.7: Acceptable for exploratory work.
+- **0.7–0.9: Good — our result (0.706) falls here.**
+- > 0.9: Excellent, but may indicate item redundancy.
+
+**What changed:** Before the Dim 4 fix, α = −0.285. Negative alpha means the dimensions
+actively contradict each other — some predict disruption up, others predict it down. This was
+the key indicator that something was wrong. After gating Dim 4 on `piped_flag`, α jumped to
+0.706, confirming the four dimensions now consistently measure the same construct.
+
+---
+
+## Part 4 — Monte Carlo Uncertainty Quantification
+
+### 4.1 The Problem: Our Scoring Has Judgment Calls
+
+When we score Dim 2 as 0 for "elsewhere ≥ 15 min", we are making a judgment call. What if
+the threshold should be 20 minutes? What if the noise parameter σ = 0.3 should be 0.5?
+How much do these choices affect the final results?
+
+Monte Carlo answers this by running the analysis 500 times with slightly different inputs
+each time and asking: how much does the output change?
+
+### 4.2 What Happens in Each of 500 Runs
+
+1. **Perturb dimension scores:** Add Gaussian noise N(0, 0.3) to every dimension score for
+   every household. Clip the result to [0, 3] to keep scores in valid range.
+   - σ = 0.3 means roughly 68% of perturbations are within ±0.3 of the original score.
+   - On a 0–3 scale, ±0.3 represents 10% of the range — a meaningful but not extreme perturbation.
+
+2. **Project through fixed PCA:** Use the PCA weights fitted on the *original* data.
+   We do NOT refit PCA in each run. If we refitted PCA, we would be changing both the inputs
+   and the weighting scheme simultaneously, making it impossible to separate the two sources
+   of uncertainty. Fixed PCA isolates input uncertainty only.
+
+3. **Normalise to 0–100:** Within each run, the raw PCA projection is linearly rescaled to
+   [0, 100] using that run's min and max values.
+
+4. **Fit a logistic regression:**
+   `logit(disruption) ~ piped + idi + piped:idi + wealth + urban + hh_size + children_u5 + C(season)`
+   Record OR(piped) and OR(piped:idi) from the model.
+
+5. **Store per-household IDI:** Record each household's IDI score in this run.
+
+### 4.3 How to Read the Monte Carlo Output
+
+**`idi_monte_carlo_summary.csv` — what each row means:**
+
+| Metric | Our value | How to read it |
+|--------|-----------|----------------|
+| OR(Piped) — Mean | 1.753 | On average across 500 runs, piped water is associated with 1.75× higher odds of disruption |
+| OR(Piped) — 2.5th pctile | 1.724 | In the most pessimistic 2.5% of runs (when scoring noise pushed the index most), the OR was still 1.72 |
+| OR(Piped) — 97.5th pctile | 1.780 | In the most optimistic 2.5% of runs, OR was 1.78 |
+| OR(Piped × IDI) — Mean | 0.817 | The interaction term is below 1 in MC runs — see discussion below |
+| % MC runs OR(Piped) > 1 | **100.0%** | In **every single** run, piped water had higher odds of disruption than non-piped. This is the robustness finding. |
+
+**The 100% robustness result** means: no matter how we perturb the dimension scoring within
+reasonable bounds, piped water always predicts higher disruption. The paradox is not an
+artifact of our scoring choices.
+
+**Per-household IDI:**
+- `idi_mean`: This household's average IDI across 500 runs (0–100 scale)
+- `idi_ci_lower`: 2.5th percentile across runs — the lower bound of uncertainty
+- `idi_ci_upper`: 97.5th percentile — upper bound
+- `idi_ci_width`: Upper minus lower. Wide CI means this household's IDI is sensitive to
+  scoring noise (usually because it sits near dimension score boundaries). Narrow CI means
+  the IDI is stable regardless of scoring perturbations.
+
+**Example:** A household with `idi_mean = 75, idi_ci_lower = 68, idi_ci_upper = 82` has a
+stable, high IDI — clearly in the high lock-in group. A household with `idi_mean = 50,
+idi_ci_lower = 35, idi_ci_upper = 65` is ambiguous — scoring noise moves it substantially.
+
+---
+
+## Part 5 — IDI Dimension Profiles (New)
+
+### 5.1 Why Show Dimensions Separately by Group
+
+The composite IDI gives one number per household. But it masks *which* dimension is driving
+lock-in for different groups. A policy maker implementing JJM needs to know: is the problem
+that poor piped households have no backup (Dim 1)? Or that they have no coping capacity
+(Dim 4)? The dimension profile tables answer this.
+
+This approach was inspired by Tikadar & Swami (2025), who showed that India's Residential
+Energy Poverty Index looks different when you break it into clean energy, reliability,
+appliances, and efficiency dimensions — a state that scores well on one dimension may
+score badly on another, requiring different interventions.
+
+### 5.2 How to Read the Dimension Profile Tables
+
+**`idi_dim_profile_by_wealth.csv`** — rows are wealth quintiles, columns are dimension scores:
+
+| Quintile | Dim 1 (Lock-in) | Dim 2 (Access) | Dim 3 (System) | Dim 4 (Coping) | IDI |
+|----------|----------------|----------------|----------------|----------------|-----|
+| Poorest | 0.975 | 1.995 | 0.686 | 0.933 | 32.8 |
+| Poorer | 1.422 | 2.374 | 1.024 | 1.250 | 44.1 |
+| Middle | 1.772 | 2.578 | 1.307 | 0.731 | 46.4 |
+| Richer | 1.948 | 2.754 | 1.483 | 0.073 | 44.8 |
+| Richest | 2.134 | 2.898 | 1.624 | 0.000 | 47.7 |
+
+**How to read this:**
+
+- **Dim 1 and Dim 3 increase from poorest to richest.** This means richer households are
+  more locked in to piped systems — they adopt piped water at higher rates and have higher
+  system dependency. This is expected: richer households can afford piped connections.
+
+- **Dim 4 decreases from poorer to richest.** The richest households have zero coping
+  deficit — they have wealth, vehicles, and fridges. The poorest piped households have
+  high coping deficits.
+
+- **The IDI is relatively flat from Poorer to Richest (~44–48).** This is a key finding:
+  despite richer households being more locked in (Dims 1 and 3), their strong coping
+  capacity (Dim 4) offsets it. The poorest piped households have lower lock-in but zero
+  coping capacity — their IDI is lower not because they are safer, but because they are
+  less likely to be piped at all.
+
+- **The policy implication:** Rich piped households are locked in but buffered. Poor piped
+  households are less locked in but completely exposed when they do have piped water.
+  Interventions for each group should differ.
+
+**`idi_dim_profile_by_urban.csv`:**
+
+| Residence | Dim 1 | Dim 2 | Dim 3 | Dim 4 | IDI |
+|-----------|-------|-------|-------|-------|-----|
+| Rural | 1.414 | 2.390 | 1.031 | 0.735 | 39.8 |
+| Urban | 2.162 | 2.764 | 1.641 | 0.405 | 51.2 |
+
+Urban households are more locked in on all dimensions except Dim 4 (they have more assets).
+The rural-urban IDI gap (39.8 vs 51.2) reflects higher piped adoption and deeper system
+dependency in cities.
+
+---
+
+## Part 6 — The Reliability Gap Index (RGI)
+
+### 6.1 Why a District-Level Index?
+
+The IDI explains household-level lock-in. But disruption is also driven by how well the
+district's *system* performs. Two identical households (same IDI) in different districts can
+have very different outcomes: one in a district with a well-maintained piped network, one in
+a district where the utility barely functions.
+
+We need a district-level measure of system underperformance. That is the RGI.
+
+### 6.2 The Logic: Observed Minus Expected
+
+The RGI is a **residual from a regression.** Here is the step-by-step logic:
+
+**Step 1 — Aggregate to district level.**
+For each of 704 districts with ≥ 100 households, we compute:
+- `observed_disruption`: weighted mean disruption rate
+- `mean_wealth_score`: average household wealth
+- `pct_urban`: share of urban households
+- `improved_coverage`: share using improved water sources
+- `piped_coverage`: share using piped water
+- `pct_monsoon`: share of households surveyed in June–September
+
+**Step 2 — Fit weighted OLS:**
+`observed_disruption = β₀ + β₁(wealth) + β₂(urban) + β₃(improved) + β₄(piped) + β₅(monsoon)`
+
+Weights = number of households per district (larger districts are more reliable).
+
+**Why these predictors?**
+- `wealth`: richer districts have more resources to cope → lower expected disruption
+- `urban`: urban areas have better infrastructure investment → lower expected disruption
+- `improved_coverage`: more improved sources → lower expected disruption
+- `piped_coverage`: **critical new addition** — a district with 90% piped coverage has more
+  households exposed to piped system failure. Without this control, high-piped districts would
+  always appear to be "underperformers" simply because more of their households are piped.
+  This would confound the RGI with the very phenomenon we are studying.
+- `pct_monsoon`: NFHS-5 was fielded over two years. Districts surveyed in July–August will
+  show higher disruption than identical districts surveyed in February — purely due to seasonal
+  flooding and contamination events. This variable removes that artifact.
+
+**Step 3 — RGI = Observed − Predicted**
+
+If the OLS predicts 25% disruption for a district but we observe 45%, `RGI = +20 pp`.
+This district's infrastructure is performing 20 percentage points worse than comparable
+districts at the same development level.
+
+If the OLS predicts 30% but we observe 20%, `RGI = −10 pp`. This district is outperforming
+expectations — possibly through better maintenance, community management, or both.
+
+**How to read RGI values:**
+- `RGI > +15 pp`: Severe Failure — infrastructure severely underperforms development level
+- `RGI = +5 to +15 pp`: Moderate Failure
+- `RGI = −5 to +5 pp`: As Expected
+- `RGI < −5 pp`: Outperforming
+
+### 6.3 Bootstrap Confidence Intervals on RGI
+
+The OLS prediction is uncertain — if we had different districts in our sample, the OLS
+coefficients would be slightly different, and all RGI values would shift. We quantify this
+with 500 bootstrap iterations:
+
+1. Draw a bootstrap sample of districts (with replacement, same total N)
+2. Refit the OLS
+3. Apply to all districts → get bootstrap RGI
+4. After 500 reps: take 2.5th and 97.5th percentile of each district's RGI distribution
+
+**A district with `RGI = 42.7, CI = [40.8, 44.8]`** (top CRISIS district, Gujarat) is
+unambiguously a severe failure — the CI is narrow and entirely above zero.
+
+**A district with `RGI = 6.2, CI = [−1.5, 14.0]`** is uncertain — it might be moderate
+failure or it might just be normal variation.
+
+### 6.4 District Typology
+
+Districts are split into four groups using the **weighted medians** of IDI and RGI as
+cut-points:
+
+| Typology | IDI | RGI | What it means |
+|----------|-----|-----|---------------|
+| **CRISIS** (189 districts) | High | High | Households locked in AND system failing. Worst outcome. |
+| **VULNERABLE** (179 districts) | High | Low | Households locked in but system working. Disruption is from lock-in, not system failure. |
+| **SAFE** (174 districts) | Low | Low | Not locked in, system working. Best outcome. |
+| **RESILIENT POOR** (162 districts) | Low | High | System failing but households not locked in — they have backup sources and fetching experience. Paradoxically safe despite failing infrastructure. |
+
+**Why weighted median?** If we used the simple median district IDI, one district with 50
+households and an extreme IDI would move the cut-point as much as a district with 5,000
+households. The weighted median is the IDI value at which the cumulative household count
+crosses 50% — it represents the median *household*, not the median *district*.
+
+---
+
+## Part 7 — The Regression Models
+
+### 7.1 IDI Logistic Regression (Finding 2)
+
+**What it tests:** After controlling for everything we can measure, is piped water still
+associated with higher disruption? Does higher IDI mean higher disruption?
+
+**Formula:**
+```
+logit(disruption) = α
+  + β₁(piped_flag)
+  + β₂(idi_mean)
+  + β₃(piped_flag × idi_mean)
+  + β₄(wealth_quintile)
+  + β₅(urban)
+  + β₆(hh_size)
+  + β₇(children_u5)
+  + β₈(C(region))
+  + β₉(SC_ST_flag)
+  + β₁₀(female_headed)
+  + β₁₁(C(head_education))
+```
+
+**How to read the output table:**
+
+| Term | OR | What it means |
+|------|-----|---------------|
+| Piped Water | **2.088** | A piped household has 2.09× the odds of disruption vs a non-piped household with the same IDI, wealth, region, etc. |
+| IDI Score | **1.007** | Each additional point of IDI (0–100 scale) multiplies disruption odds by 1.007. At IDI=50 vs IDI=0, that is 1.007^50 = 1.42× higher odds. |
+| Piped × IDI | 0.996 | The interaction — see below |
+| Wealth quintile | 0.974 | Each quintile step *up* reduces disruption odds by 2.6%. Wealthier = less disruption. |
+| SC/ST | **1.105** | SC/ST households have 10.5% higher odds of disruption, even after controlling for wealth and source type. |
+| Female-headed | 0.975 | Female-headed households have slightly lower disruption odds. |
+
+**The interaction term (Piped × IDI = 0.996):**
+This is below 1, which seems to say "higher IDI reduces the piped penalty." This is a
+multicollinearity artifact. IDI and `piped_flag` are extremely correlated (mean IDI 59.4 points
+higher for piped). When both enter the model, `piped_flag` absorbs the positive IDI variance, and
+the interaction term captures the residual — households that are "high IDI but not piped" (a rare
+group). We report this honestly and treat it as a model limitation rather than a substantive finding.
+
+**Cluster-robust standard errors:** Households within the same PSU (village or urban block) share
+unmeasured community characteristics. Without clustering, standard errors would be too small —
+we would falsely conclude more variables are significant. Clustering at the PSU level corrects this.
+The formula inflates standard errors to account for within-cluster correlation.
+
+**What a p-value means here:** With n = 548,637 households, even tiny effects are statistically
+significant. We therefore interpret effect sizes (OR, pp difference) rather than p-values alone.
+OR = 1.007 per IDI point is statistically significant at p < 0.001 but the practical significance
+depends on the IDI distribution — since IDI ranges 0–100, the full-range effect is OR = 1.007^100
+= 2.01× — meaningful.
+
+### 7.2 GEE Multilevel Model (Finding 4)
+
+**Why not just a regular logistic regression?**
+Households within the same district share unmeasured infrastructure quality — the reliability
+of their local water utility, the state of the pipes, the frequency of electricity outages that
+power pumps. Ignoring this would produce standard errors that are too small.
+
+A standard approach would be a random-effects mixed model, but random-effects models require
+distributional assumptions and produce "subject-specific" estimates (the effect for a specific
+household). We want "population-averaged" estimates — the average effect across all Indian
+households — which is what policy claims require.
+
+**GEE (Generalized Estimating Equations)** produces population-averaged estimates and accounts
+for within-district correlation using an "exchangeable" structure: all pairs of households
+within a district are assumed equally correlated. The correlation parameter α is estimated
+from the data.
+
+**How to read the GEE output:**
+
+| Term | OR | What it means |
+|------|-----|---------------|
+| IDI (std) | 0.897 | Negative direction — see note below |
+| RGI (std) | **1.675** | Each SD increase in district RGI → 67.5% higher odds of disruption |
+| IDI × RGI | 1.037 | The interaction — direction is correct but p = 0.083 |
+| Piped Water | **2.293** | Piped water still doubles disruption after all controls |
+
+**Why IDI (std) OR = 0.897 (below 1)?**
+In the GEE model, `piped_flag` and `idi_std` are both included. Since IDI is built partly
+from piped_flag (Dims 1 and 3 are both driven by piped adoption), they are highly correlated.
+`piped_flag` absorbs the positive IDI effect, leaving the residual IDI coefficient to pick up
+"high IDI among non-piped households" — a group that doesn't exist meaningfully. This is the
+same collinearity issue as the logit interaction term. We note this explicitly in the paper.
+
+**RGI OR = 1.675:** The district-level finding is strong and clean. Each standard deviation
+increase in the reliability gap is associated with 67.5% higher odds of disruption, independent
+of household-level IDI, wealth, and demographics. This confirms that where you live matters —
+your district's infrastructure quality directly predicts your disruption risk.
+
+**IDI × RGI interaction OR = 1.037, p = 0.083:**
+The interaction is in the expected direction (above 1) but does not reach p < 0.05. This means
+we cannot confirm from this data alone that the IDI effect is steeper in failing districts.
+We discuss reasons: district-level geography may be too coarse, and RGI measurement error
+attenuates the interaction.
+
+### 7.3 Slope-as-Outcome Model (Finding 5)
+
+**The question:** In each district separately, how strongly does IDI predict disruption?
+And is that district-specific IDI effect larger in districts with higher RGI?
+
+This is a stronger test than the GEE interaction because it directly estimates the IDI
+mechanism within each district, rather than testing a joint effect in the pooled sample.
+
+**Stage 1 — Per-district IDI slopes:**
+For each of 657 districts (with ≥ 30 households and ≥ 50 piped households), we fit:
 `logit(disruption) = α_d + β_d × IDI + γ_d × wealth + δ_d × urban`
 
-The key output is β_d — the IDI coefficient within district d. Some districts will have β_d = 0.08 (IDI strongly predicts disruption locally) and others will have β_d = 0.01 (IDI barely predicts disruption locally). This heterogeneity is the phenomenon we want to explain.
+The output is β_d (the IDI slope in district d) and SE(β_d) (its standard error).
 
-We also record SE(β_d) — the standard error of the slope estimate in each district. Districts with fewer households will have larger SE (less precise slope estimates).
+**Stage 2 — WLS regression:**
+`β̂_d = a + b × RGI_d + ε_d`    weighted by 1 / SE(β_d)²
 
-**Why we need a minimum of 50 piped households**: A logistic regression needs variation in the predictor (IDI) and in the outcome (disruption). If a district has only 20 piped households, the IDI slope estimate will be highly imprecise — essentially noise. Setting a minimum of 50 piped households (and 30 total observations) ensures that Stage 1 slopes are based on sufficient data.
+The weight 1/SE² means districts with precise slope estimates (large samples) contribute
+more to the regression. Districts with noisy slopes (small samples) contribute little.
 
-**Stage 2 — Weighted least squares**: We then regress the Stage 1 slopes on district-level RGI:
+**How to read the output:**
 
-`β̂_d = a + b × RGI_d + ε_d`
+| Term | Coefficient | What it means |
+|------|-------------|---------------|
+| Intercept | 0.0085 | The average district IDI slope — in a typical district, each IDI point increases log-odds of disruption by 0.0085 |
+| RGI (std) | 0.0007 | p = 0.083 — not significant. Direction correct but weak. |
 
-This is a cross-level regression: the unit of analysis is the district (not the household). The outcome is the district's IDI slope from Stage 1.
+**Why 0.0085 is meaningful:** Across the IDI range 0–100, the typical within-district effect
+is 0.0085 × 100 = 0.85 log-odds, or about OR = exp(0.85) = 2.34× — comparable to the
+pooled logit result.
 
-**Inverse-variance weighting**: The regression is weighted by 1/SE(β_d)². Districts with precise slope estimates (small SE) get high weight; districts with imprecise slopes (large SE) get low weight. This is statistically optimal — it minimises the variance of the Stage 2 coefficient estimates. It is equivalent to what a random-effects meta-analysis would do.
+**Why RGI is not significant here:**
+Two reasons. First, the RGI itself is measured with error (it is a regression residual with
+bootstrap CI). When the predictor in Stage 2 has measurement error, the coefficient is
+attenuated toward zero (classical attenuation bias). Second, 704 districts may be too coarse —
+the IDI × RGI mechanism likely operates at sub-district scale.
 
-**Interpretation of b (the Stage 2 coefficient)**:
-- Positive and significant: Districts with higher reliability gaps (failing infrastructure) show steeper IDI-to-disruption relationships. In those districts, being locked in to the piped system has a large per-unit effect on disruption probability.
-- Not significant: The district-level IDI effect does not vary systematically with RGI. The GEE interaction might still be significant due to household-level co-variation, but the specific mechanism (RGI steepening the IDI effect) would not be confirmed.
+### 7.4 Propensity Score Matching (Robustness)
 
-**Why this is stronger than the GEE interaction**: The GEE interaction picks up any joint effect of IDI and RGI. The slope-as-outcome explicitly tests whether the IDI mechanism (how strongly lock-in predicts disruption within a district) varies as a function of RGI. This is the classic contextual moderation design in multilevel analysis.
+**The causal question:** All regressions show association. Does piped water *cause* more
+disruption, or do piped-water households just happen to live in places with worse
+infrastructure?
 
-### 4.4 Propensity Score Matching (Robustness)
+PSM constructs a counterfactual. For every piped-water household, we find a tube-well
+household that is as similar as possible on all observable characteristics. The disruption
+gap in this matched sample is closer to a causal estimate because confounders are balanced.
 
-**The problem with regression-based causal claims**: Even with many controls, a logistic regression associating piped water with disruption cannot rule out unmeasured confounders. Perhaps piped-water households live in areas with worse electricity supply (which powers pumps) — if we do not control for electricity reliability, the piped coefficient is confounded.
+**How matching works:**
 
-**What PSM does**: PSM creates a matched sample where piped-water (treatment) and tube-well (control) households look identical on all observable characteristics. Within this matched sample, the comparison between piped and tube-well disruption rates is closer to a causal estimate.
+Step 1 — Predict the probability of being piped (`propensity score`) using:
+wealth, urban, household size, children under 5, female-headed, electricity access,
+improved sanitation, SC/ST status.
 
-**Covariates used for matching**:
-- `wealth_q_num`, `urban`, `hh_size`, `children_u5` — demographics
-- `female_headed`, `sc_st_flag` — social
-- `has_electricity`, `improved_sanitation` — infrastructure access
-These are the observable factors that predict both water source choice AND disruption. By balancing on them, we remove their confounding.
+Step 2 — For each piped household, find the tube-well household with the closest
+propensity score, within a caliper of 0.05.
 
-**Propensity score**: A logistic regression predicting `treatment = piped` from the covariates. The predicted probability of being piped is the propensity score. Matching on the propensity score is equivalent to matching on all covariates simultaneously (under the balancing property of propensity scores).
+Step 3 — Compute ATT = mean disruption in matched piped group − mean disruption in
+matched control group.
 
-**1:1 nearest-neighbour matching with caliper 0.05**: Each piped household is matched to the tube-well household with the closest propensity score, within 0.05 of a standard deviation (the caliper). The caliper prevents poor matches — if no tube-well household is within 0.05 of a piped household's propensity score, the piped household is excluded. This reduces sample size but improves match quality.
+**How to read the PSM output:**
 
-**Average Treatment Effect on the Treated (ATT)**: The ATT asks: "For piped-water households (the treated group), what is the average difference in disruption probability compared to what they would have experienced with tube wells?" This is the relevant policy parameter — it tells us the effect of piped water for the households that actually have piped water.
+| Metric | Value | What it means |
+|--------|-------|---------------|
+| ATT | **+15.06 pp** | Piped water causes ~15 percentage points more disruption than tube wells, for households identical on observable characteristics |
+| SE | 0.13 pp | The estimate is very precise because of the large sample (296,651 matched pairs) |
+| 95% CI | 14.77–15.31 pp | Even the lower bound is well above zero |
+| % bootstrap > 0 | **100%** | In every single bootstrap resample, piped water has higher disruption |
 
-ATT = mean(disruption | piped, matched) − mean(disruption | tube well, matched)
+**15 pp is the paper's strongest causal number.** The large CI width (14.77–15.31) reflects
+precision, not uncertainty — the effect is very stably around +15 pp. The PSM sample of
+296,651 matched pairs out of 296,651 piped households (100% match rate) means all piped
+households found a tube-well match within the caliper, so no selection bias from dropping
+unmatched units.
 
-**Bootstrap SE**: We resample from the matched pairs (with replacement) 500 times and recompute the ATT each time. The standard deviation of the bootstrap distribution is our standard error. The 95% CI covers 2.5th to 97.5th percentile of bootstrap ATTs.
-
-**Interpretation**: If ATT = +11.2 pp (SE = 1.2 pp), we can say: "Switching a household from tube well to piped water, holding observable characteristics constant, increases its expected disruption probability by approximately 11 percentage points." The phrase "holding observable characteristics constant" is important — PSM only controls for what we can measure.
-
----
-
-## Part 5: Aggregation and Seasonal Adjustment
-
-### 5.1 Why add pct_monsoon to the RGI model
-
-NFHS-5 was conducted over two years (2019–21), not all at once. Some districts were surveyed predominantly during the monsoon season (June–September), when water disruptions from flooding and contamination are more common. Other districts were surveyed during the dry season, when supply shortfalls dominate.
-
-If we do not control for when the district was surveyed, a district surveyed in July will appear to have higher disruption than an identical district surveyed in February — purely because of survey timing, not infrastructure quality. This would inflate the RGI for monsoon-surveyed districts and deflate it for dry-season-surveyed districts.
-
-`pct_monsoon` = weighted fraction of households in the district surveyed in months 6, 7, 8, or 9. Adding this to the OLS removes the survey-timing artifact from the RGI residual.
-
-### 5.2 Why add C(season) to the IDI Monte Carlo regression
-
-Same logic applied at the household level. The Monte Carlo regression inside `run_monte_carlo` estimates OR(piped) in each of 500 runs. If we do not control for season, the OR distribution includes variation from survey timing rather than just from the IDI scoring uncertainty. Adding `C(season)` as a categorical control removes this source of noise.
-
-This also absorbs the old standalone "seasonal analysis table" from script-d.py — we no longer need a separate seasonal disruption table because seasonal variation is controlled for in both major models.
-
----
-
-## Part 6: Validation and Diagnostics
-
-### 6.1 IDI Validation
-
-**Predictive validity (Pearson r and AUC)**: We correlate IDI with observed disruption. Pearson r > 0 and p < 0.05 means IDI is significantly associated with the outcome we designed it to predict. AUC > 0.60 means IDI can discriminate disrupted from non-disrupted households better than chance. AUC = 0.50 is chance; AUC = 1.0 is perfect discrimination.
-
-**Discriminant validity (r with wealth score)**: We check that IDI is not simply a wealth proxy. If |r(IDI, wealth)| > 0.80, the index adds no information beyond wealth — we would be better off just using the wealth score. We require |r| < 0.50.
-
-**Known-groups validity**: We compare mean IDI for piped vs tube-well households. Since we built IDI partly around the piped/non-piped distinction, piped households should have higher IDI. If mean IDI(piped) < mean IDI(tube well), something is wrong with the scoring logic.
-
-**Cronbach's alpha**: As described earlier, we want α > 0.60 to justify combining the dimensions.
-
-### 6.2 RGI Diagnostics
-
-**OLS R²**: Higher is better — it means the socioeconomic predictors explain more of the disruption variation, leaving a cleaner residual for RGI. R² around 0.5 is reasonable; very low R² (e.g., 0.1) would mean RGI is mostly noise.
-
-**Moran's I**: Significant positive Moran's I validates that RGI clusters geographically (expected if it captures real infrastructure quality variation). Non-significant Moran's I would suggest RGI is geographically random — potentially just noise.
-
-**Bootstrap CI width**: Narrow CIs (e.g., ±3 pp) indicate that RGI estimates are stable across samples. Wide CIs (e.g., ±15 pp) in a district with small sample size flag that the RGI should be interpreted cautiously for that district.
+**What PSM cannot control for:** Unobservable confounders — e.g., whether piped-water areas
+have worse local governance that also makes electricity less reliable. We note this as a
+limitation.
 
 ---
 
-## Summary Table: Every Output and What It Answers
+## Part 8 — Reading the Output Files
 
-| Output | File | Answers |
-|---|---|---|
-| Table 1a–1e | tables/ | Does the paradox hold across strata? |
-| Table 2 (IDI logit) | results/ | What is the OR for piped×IDI interaction? |
-| Table 3 (crisis districts) | tables/ | Which districts are CRISIS? |
-| Table 4 (state ranking) | tables/ | Which states are failing most? |
-| Table 5 (GEE) | results/ | Does IDI×RGI interaction hold multilevel? |
-| Table 6a (stage1 slopes) | results/ | How does IDI predict disruption in each district? |
-| Table 6b (stage2 WLS) | results/ | Does RGI explain heterogeneity in IDI slopes? |
-| Table 7 (PSM ATT) | results/ | What is the causal effect of piped water? |
-| idi_monte_carlo_summary.csv | results/ | Is the piped OR robust to scoring uncertainty? |
-| idi_validation.csv | results/ | Does IDI pass validation checks? |
-| district_rgi_summary.csv | tables/ | GIS-ready district RGI for mapping |
-| rgi_moran_test.csv | results/ | Does RGI cluster geographically? |
-| water_paradox_report.md | / | Full research paper (auto-generated) |
+### Complete list of output files and what each answers
+
+**Tables folder (`nfhs5_output/tables/`):**
+
+| File | What it contains |
+|------|-----------------|
+| `table_1a_by_source.csv` | Disruption rate for all 15 source types with RR vs tube well. The primary Table 1 in the paper. |
+| `table_1b_by_source_wealth.csv` | Piped sub-types + tube well disruption by wealth quintile. Shows paradox holds within all wealth groups. |
+| `table_1c_by_source_urban.csv` | Same, by urban/rural |
+| `table_1d_by_source_region.csv` | Same, by geographic region |
+| `table_1e_by_source_season.csv` | Same, by season. Shows monsoon peak. |
+| `table_1f_category_summary.csv` | One-row-per-category summary: piped combined, tube well, protected, unprotected, tanker, bottled/RO |
+| `table_1_wealth_idi_dims.csv` | IDI dimension profiles by wealth quintile (4 dims + composite) |
+| `table_1_urban_idi_dims.csv` | IDI dimension profiles by urban/rural |
+| `table_1_source_idi_dims.csv` | IDI dimension profiles by water source type |
+| `table_1i_dim_disruption_gradient.csv` | For each dimension: disruption rate in low-half vs high-half households. Shows which dimension most strongly tracks disruption. |
+| `district_rgi_summary.csv` | All 704 districts: RGI, CI, typology, IDI, piped coverage. GIS-ready for mapping. |
+| `table_3a_top_crisis.csv` | Top 20 CRISIS districts by RGI magnitude |
+| `table_3b_top_safe.csv` | Top 20 SAFE districts |
+| `table_3c_resilient_poor.csv` | Top 20 RESILIENT POOR districts |
+| `table_3d_state_paradox.csv` | State-level aggregation of RGI, IDI, paradox ratio |
+
+**Results folder (`nfhs5_output/results/`):**
+
+| File | What it contains |
+|------|-----------------|
+| `idi_validation.csv` | Four validation checks: Pearson r, AUC, discriminant validity, known-groups validity |
+| `idi_monte_carlo_summary.csv` | OR(piped) distribution across 500 MC runs. The robustness finding. |
+| `idi_dim_profile_by_wealth.csv` | Detailed dimension profiles (also saved to tables/) |
+| `idi_dim_profile_by_urban.csv` | Same |
+| `idi_dim_profile_overall.csv` | Overall means, SDs, and PCA loadings for each dimension |
+| `table2_idi_regression.csv` | IDI logistic regression — ORs, CIs, p-values for key terms |
+| `table2b_predicted_probs.csv` | Predicted probabilities for four household scenarios |
+| `table5_gee_multilevel.csv` | GEE model results |
+| `table6a_stage1_idi_slopes.csv` | Per-district IDI slopes from Stage 1. 657 districts × {slope, SE, n_obs, n_piped}. |
+| `table6b_stage2_wls_rgi.csv` | Stage 2 WLS: does RGI predict district IDI slopes? |
+| `table7_psm_att.csv` | PSM ATT with bootstrap CI — the causal result |
+| `rgi_moran_test.csv` | Moran's I result for spatial autocorrelation of RGI |
+
+**Report (`nfhs5_output/water_paradox_report_[timestamp].md`):**
+Auto-generated markdown report combining all findings into a structured paper outline.
+Updated every time `main.py` runs.
+
+---
+
+## Part 9 — What Is Not Working Yet and Why
+
+| Issue | What the output shows | Root cause | What would fix it |
+|-------|----------------------|------------|-------------------|
+| IDI main effect negative in GEE (OR = 0.897) | IDI std → OR < 1, p < 0.001 | `piped_flag` and `idi_std` are collinear (r ≈ 0.9). `piped_flag` absorbs the positive IDI variance. | Remove `piped_flag` from GEE and rely on IDI alone; or use orthogonalised IDI residual |
+| IDI × RGI not significant (p = 0.083) | OR = 1.037, direction correct | RGI is measured at district level with error; districts too coarse | Sub-district data; errors-in-variables correction in Stage 2 |
+| Disruption gradient Dim 1 and Dim 2 show NaN | `table_1i` | Dim 1 is binary (0 or 3); median split produces empty halves | Replace median split with bottom vs top third for binary dims |
+| Slope-as-outcome R² = 0.005 | Very low explanatory power in Stage 2 | RGI measurement error; geographic resolution | Same as IDI × RGI issue above |
+
+---
+
+## Summary: The Core Numbers to Remember
+
+| Number | What it is | Where it comes from |
+|--------|-----------|---------------------|
+| **2.43×** | Relative risk of disruption: piped vs tube well | Table 1a, weighted rate |
+| **25.5% vs 10.5%** | Raw disruption rates: piped vs tube well | Table 1a |
+| **29.7%** | Highest-disruption piped sub-type: yard/plot | Table 1a |
+| **OR = 2.09** | Adjusted odds ratio for piped water | Table 2, logistic regression |
+| **OR = 1.007** | Adjusted OR per IDI point | Table 2 |
+| **ATT = +15.1 pp** | Causal effect of piped water via PSM | Table 7 |
+| **α = 0.706** | IDI internal consistency | IDI build step |
+| **57.7%** | Variance explained by IDI first component | PCA results |
+| **100%** | MC runs where piped OR > 1 | MC summary |
+| **OR = 1.675** | RGI effect on disruption (GEE) | Table 5 |
+| **189** | CRISIS districts | District typology |
