@@ -81,27 +81,58 @@ class Config:
     ])
 
     # ─── Water source mapping ─────────────────────────────────────────────
+    # Sub-types kept separate so Table 1a can show piped breakdown.
+    # piped_flag in data_pipeline still uses codes 11–14 as before.
     WATER_SOURCE_MAP: Dict[int, str] = field(default_factory=lambda: {
-        11: "Piped Water", 12: "Piped Water",
-        13: "Piped Water", 14: "Piped Water",
+        11: "Piped — Into Dwelling",
+        12: "Piped — Yard/Plot",
+        13: "Piped — Neighbour/Shared",
+        14: "Piped — Public Tap/Standpipe",
         21: "Tube Well/Borehole",
-        31: "Protected Well/Spring",
-        32: "Unprotected Well/Spring",
+        31: "Protected Well",
+        32: "Unprotected Well",
         41: "Protected Spring",
         42: "Unprotected Spring",
-        43: "Surface Water",
+        43: "Surface Water (river/lake/canal)",
         51: "Rainwater",
-        61: "Tanker/Cart",  62: "Tanker/Cart",
+        61: "Tanker Truck",
+        62: "Cart with Small Tank",
         71: "Bottled Water",
         92: "Community RO Plant",
         96: "Other Source",
     })
 
+    # Grouped label used wherever we need piped as a single category
+    # (regression dummies, IDI scoring, PSM).
+    PIPED_SOURCES: List[str] = field(default_factory=lambda: [
+        "Piped — Into Dwelling",
+        "Piped — Yard/Plot",
+        "Piped — Neighbour/Shared",
+        "Piped — Public Tap/Standpipe",
+    ])
+
     SOURCE_ORDER: List[str] = field(default_factory=lambda: [
-        "Surface Water", "Unprotected Well/Spring", "Unprotected Spring",
-        "Tanker/Cart", "Piped Water", "Rainwater", "Community RO Plant",
-        "Protected Well/Spring", "Protected Spring",
-        "Tube Well/Borehole", "Bottled Water", "Other Source",
+        # Piped sub-types first (highest disruption)
+        "Piped — Yard/Plot",
+        "Piped — Neighbour/Shared",
+        "Piped — Public Tap/Standpipe",
+        "Piped — Into Dwelling",
+        # Tanker/market
+        "Tanker Truck",
+        "Cart with Small Tank",
+        # Surface / unprotected
+        "Surface Water (river/lake/canal)",
+        "Unprotected Spring",
+        "Unprotected Well",
+        # Community-managed
+        "Community RO Plant",
+        "Protected Spring",
+        "Protected Well",
+        # Self-sufficient
+        "Rainwater",
+        "Bottled Water",
+        "Tube Well/Borehole",
+        "Other Source",
     ])
 
     # ─── Geography ────────────────────────────────────────────────────────

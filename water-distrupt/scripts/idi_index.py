@@ -34,7 +34,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score
 import statsmodels.formula.api as smf
 from scipy.stats import pearsonr
-from typing import Dict, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from config import Config
 
@@ -45,9 +45,13 @@ warnings.filterwarnings("ignore")
 # DIMENSION SCORING
 # ─────────────────────────────────────────────────────────────────────────────
 
-def score_dim1_source_diversity(df: pd.DataFrame) -> pd.Series:
+def score_dim1_source_diversity(df: pd.DataFrame,
+                                piped_sources: Optional[list] = None) -> pd.Series:
     """
     Dimension 1 — Source Lock-in (lack of fallback).
+
+    Uses piped_flag (set by data_pipeline from PIPED_SOURCES list) so it
+    stays correct regardless of how piped sub-type names change in config.
 
     Score │ Situation
     ──────┼──────────────────────────────────────────────────────────
@@ -60,10 +64,15 @@ def score_dim1_source_diversity(df: pd.DataFrame) -> pd.Series:
       0   │ Non-piped primary + different-type alternative
           │   → genuinely diversified, lowest lock-in
     """
+    if piped_sources is None:
+        piped_sources = []
+
     scores        = pd.Series(0.0, index=df.index)
     primary_piped = df["piped_flag"] == 1
     no_alt        = df["alt_source"] == "No Other Source"
-    alt_piped     = df["alt_source"] == "Piped Water"
+    # alt is piped if it matches any piped sub-type label
+    alt_piped     = df["alt_source"].isin(piped_sources) if piped_sources \
+                    else df["alt_source"].str.startswith("Piped")
     alt_exists    = ~no_alt
 
     scores[primary_piped & (no_alt | alt_piped)] = 3.0
@@ -80,25 +89,38 @@ def score_dim2_access_complexity(df: pd.DataFrame) -> pd.Series:
     """
     Dimension 2 — Access Complexity (preparedness for disruption).
 
-    INVERTED from traditional vulnerability framing:
-    Households already walking to fetch are experienced copers.
-    Households with in-dwelling water are unprepared when the tap fails.
+    Primary signal: water_on_premises (hv204 == 996, set by the pipeline).
+    Households with water on-premises have ZERO fetching experience — when
+    the tap fails they have no practiced fallback routine.
+
+    water_location (hv235) is used as a tie-breaker for the off-premises group
+    only. This avoids the pipeline collision where on-premises households land
+    in water_location="Unknown" (hv235 is not recorded when hv204=996),
+    which caused the old version to score 40% of the sample at the neutral
+    default instead of the correct maximum.
 
     Score │ Situation
-    ──────┼──────────────────────────────────────────────────────────
-      3   │ Water in dwelling  → zero fetching experience
-      2   │ Water in yard/plot → minimal fetching experience
-      1   │ Elsewhere, < 15 min → some experience
-      0   │ Elsewhere, ≥ 15 min → fetching-experienced, adaptable
+    ──────┼─────────────────────────────────────────────────────────────
+      3   │ water_on_premises = 1  → fully dependent, no fetch experience
+          │   (piped/yard water flows to the tap; hv235 not asked)
+      2   │ off-premises, water in yard/plot → minimal walk, low experience
+      1   │ off-premises, elsewhere < 15 min → some fetching routine
+      0   │ off-premises, elsewhere ≥ 15 min → experienced, adaptable
     """
-    scores = pd.Series(1.0, index=df.index)
-    loc    = df["water_location"]
-    time   = df["time_to_water_min"].fillna(np.nan)
+    scores = pd.Series(1.0, index=df.index)   # neutral default
 
-    scores[loc == "In Dwelling"]                = 3.0
-    scores[loc == "In Yard/Plot"]               = 2.0
-    scores[(loc == "Elsewhere") & (time <  15)] = 1.0
-    scores[(loc == "Elsewhere") & (time >= 15)] = 0.0
+    # Primary: on-premises households are most dependent
+    on_prem = df["water_on_premises"] == 1
+    scores[on_prem] = 3.0
+
+    # Off-premises: use water_location + time as tie-breaker
+    off_prem = ~on_prem
+    loc  = df["water_location"]
+    time = df["time_to_water_min"].fillna(np.nan)
+
+    scores[off_prem & (loc == "In Yard/Plot")]               = 2.0
+    scores[off_prem & (loc == "Elsewhere") & (time <  15)]  = 1.0
+    scores[off_prem & (loc == "Elsewhere") & (time >= 15)]  = 0.0
     return scores
 
 
@@ -107,68 +129,79 @@ def score_dim3_system_dependency(df: pd.DataFrame) -> pd.Series:
     Dimension 3 — Market / System Dependency.
 
     How much does alternative sourcing require money or formal systems?
+    Uses piped_flag so it works regardless of how piped sub-types are named.
 
     Score │ Situation
     ──────┼──────────────────────────────────────────────────────────
       3   │ Tanker / bottled  → pure market, expensive, unreliable
-      2   │ Piped water       → single point of failure
-      1   │ Community well / protected spring → semi-managed
+      2   │ Piped (any sub-type) → single centralised point of failure
+      1   │ Community RO / protected well or spring → semi-managed
       0   │ Own well / rainwater / surface → self-sufficient
     """
     scores = pd.Series(0.0, index=df.index)
     src    = df["water_source"]
 
-    scores[src.isin(["Tanker/Cart", "Bottled Water"])]         = 3.0
-    scores[src == "Piped Water"]                               = 2.0
+    scores[src.isin(["Tanker Truck", "Cart with Small Tank",
+                     "Tanker/Cart", "Bottled Water"])]        = 3.0
+    scores[df["piped_flag"] == 1]                             = 2.0
     scores[src.isin(["Community RO Plant",
-                     "Protected Well/Spring",
-                     "Protected Spring"])]                     = 1.0
+                     "Protected Well", "Protected Well/Spring",
+                     "Protected Spring"])]                    = 1.0
     return scores
 
 
 def score_dim4_coping_buffer(df: pd.DataFrame) -> pd.Series:
     """
-    Dimension 4 — Coping Deficit (POSITIVE VALENCE, lock-in consistent).
+    Dimension 4 — Piped Coping Deficit.
 
-    Absorbs the old CCI economic + physical capital components.
-    Recoded so that LOW coping capacity = HIGH score (more locked in),
-    consistent with Dims 1, 2, 3. This fixes the negative Cronbach alpha
-    caused by the previous negation approach.
+    Concept: when a piped household's tap runs dry, their ability to cope
+    depends on whether they have (a) stored water (fridge as proxy for
+    refrigeration/storage culture), (b) mobility to fetch an alternative
+    (vehicle), and (c) wealth to buy water or pay for tanker delivery.
 
-    Formula: dim4_lockedness = MAX_BUFFER − buffer_score
-    where buffer_score = wealth_map + has_fridge + has_vehicle  (0–5 raw)
-    capped to 0–3, so dim4_lockedness is also 0–3.
+    The key insight from the data: among NON-piped households, lacking a
+    fridge or vehicle is not a coping deficit — they already fetch daily and
+    have a practiced routine. The deficit is only meaningful for households
+    that depend on a tap that can fail. We therefore gate the score on
+    piped_flag: non-piped households score 0 regardless of assets, because
+    their disruption exposure is structurally different.
+
+    Among piped households (data-verified):
+      has_fridge=0 → 27.9% disruption, has_fridge=1 → 25.3%  (correct direction)
+      has_vehicle=0 → 27.3%, has_vehicle=1 → 26.2%           (correct direction)
 
     Score │ Situation
-    ──────┼──────────────────────────────────────────────────────────
-      3   │ Poorest wealth, no fridge, no vehicle — zero coping buffer
-      2   │ Lower-middle wealth, one asset
-      1   │ Middle wealth or two assets
-      0   │ Richer/richest, fridge AND vehicle — strong buffer
-
-    Interpretation: enters PCA the same direction as Dims 1, 2, 3.
-    High score = household is structurally unable to cope with disruption.
-    PCA loading should be positive (validated against other dims).
+    ──────┼──────────────────────────────────────────────────────────────
+      0   │ Non-piped household  → coping deficit concept does not apply
+          │   OR  piped + wealth Q4/Q5 + fridge + vehicle (strong buffer)
+      1   │ Piped + middle wealth + one asset
+      2   │ Piped + lower wealth + one asset, or middle wealth + no assets
+      3   │ Piped + poorest/poorer wealth + no fridge + no vehicle
+          │   → maximally locked in: tap fails, no storage, no mobility,
+          │     no money for tanker
     """
     buffer = pd.Series(0.0, index=df.index)
 
-    # Wealth: richer quintiles have more coping capacity → lower lockedness
+    # Wealth contribution: richer → more buffer
+    # Map: Q1=0, Q2=0, Q3=1, Q4=2, Q5=3
     wq_buffer = {1: 0, 2: 0, 3: 1, 4: 2, 5: 3}
     if "wealth_q_num" in df.columns:
         buffer += df["wealth_q_num"].map(wq_buffer).fillna(0)
 
-    # Fridge: physical water storage proxy
+    # Physical storage proxy: fridge → can store treated water
     if "has_fridge" in df.columns:
         buffer += df["has_fridge"].fillna(0)
 
-    # Vehicle: fetching mobility from alternative source
+    # Mobility proxy: vehicle → can fetch from alternative source
     if "has_vehicle" in df.columns:
         buffer += df["has_vehicle"].fillna(0)
 
     buffer = buffer.clip(0, 3)
 
-    # Invert: high buffer → low lock-in score (0), no buffer → high (3)
-    return 3.0 - buffer
+    # Coping deficit = 3 - buffer, but only for piped households.
+    # Non-piped households score 0: they are not in the "locked-in tap" regime.
+    piped = df["piped_flag"].fillna(0).astype(float)
+    return piped * (3.0 - buffer)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -245,8 +278,8 @@ def run_monte_carlo(
       c. idi_col_arr: pre-allocated float array, updated in-place each run.
          No DataFrame copy() inside the loop.
     """
-    print(f"\n  Running Monte Carlo ({cfg.MONTE_CARLO_RUNS} iterations)...")
-    print(f"  (season-adjusted formula, plain Newton solver)")
+    print(f"\n  Running Monte Carlo ({cfg.MONTE_CARLO_RUNS} iterations)...", flush=True)
+    print(f"  (season-adjusted formula, plain Newton solver)", flush=True)
 
     rng    = np.random.default_rng(cfg.MONTE_CARLO_SEED)
     n_hh   = len(df)
@@ -335,18 +368,20 @@ def run_monte_carlo(
             or_interaction[run] = np.nan
 
         if (run + 1) % 100 == 0:
-            pct_done = (run + 1) / n_runs * 100
+            pct_done    = (run + 1) / n_runs * 100
             valid_so_far = np.nanmean(or_piped[:run+1])
-            print(f"    [{pct_done:5.1f}%] Run {run+1}/{n_runs} "
-                  f"| mean OR(piped) so far: {valid_so_far:.3f}")
+            bar_filled  = int(pct_done / 5)   # 20 chars wide
+            bar         = "█" * bar_filled + "░" * (20 - bar_filled)
+            print(f"    [{bar}] {pct_done:5.1f}%  run {run+1}/{n_runs}"
+                  f"  |  mean OR(piped): {valid_so_far:.3f}", flush=True)
 
     # ── Robustness summary ────────────────────────────────────────────────
     valid_or = or_piped[~np.isnan(or_piped)]
     pct_gt1  = (valid_or > 1.0).mean() * 100
 
-    print(f"\n  Monte Carlo complete.")
+    print(f"\n  Monte Carlo complete.", flush=True)
     print(f"    OR(piped) > 1 in {pct_gt1:.1f}% of runs "
-          f"({'ROBUST' if pct_gt1 >= 95 else 'MODERATE'})")
+          f"({'ROBUST' if pct_gt1 >= 95 else 'MODERATE'})", flush=True)
 
     return {
         "idi_all_runs":    idi_all_runs,
@@ -474,7 +509,8 @@ class IDIBuilder:
         print("=" * 60)
 
         # 1. Score dimensions (all positive-valence: higher = more locked in)
-        self.df["idi_dim1"] = score_dim1_source_diversity(self.df)
+        piped_sources = getattr(self.cfg, "PIPED_SOURCES", [])
+        self.df["idi_dim1"] = score_dim1_source_diversity(self.df, piped_sources)
         self.df["idi_dim2"] = score_dim2_access_complexity(self.df)
         self.df["idi_dim3"] = score_dim3_system_dependency(self.df)
         # Dim 4: coping deficit — 3 minus buffer, so poorest/no-assets = 3
@@ -521,7 +557,10 @@ class IDIBuilder:
         # 6. Validate
         self.validation_df = validate_idi(self.df, self.cfg)
 
-        # 7. Save outputs
+        # 7. Dimension profiles — per-dimension breakdown by wealth and urban/rural
+        self.dim_profiles = self._compute_dim_profiles()
+
+        # 8. Save outputs
         self._save_outputs()
 
         print(f"\n  ✓  IDI complete.")
@@ -530,6 +569,85 @@ class IDIBuilder:
         print(f"     Mean CI width: {self.df['idi_ci_width'].mean():.1f} pp")
         print("=" * 60)
         return self.df
+
+    def _compute_dim_profiles(self) -> Dict[str, pd.DataFrame]:
+        """
+        Per-dimension mean scores broken down by wealth quintile and urban/rural.
+
+        Mirrors the REPI paper (Tikadar & Swami 2025) Fig. 11 structure:
+        a state may score high on one dimension and low on another, so the
+        aggregate IDI alone can obscure which structural factor drives lock-in.
+
+        Returns a dict with keys:
+          "by_wealth"  — rows: wealth quintile, cols: dim1–dim4 + idi_mean
+          "by_urban"   — rows: Urban/Rural, cols: dim1–dim4 + idi_mean
+          "by_source"  — rows: water source category, cols: dim1–dim4 + idi_mean
+          "overall"    — single-row summary with means and PCA loadings
+        """
+        df  = self.df
+        agg_cols = self.DIM_COLS + ["idi_mean"]
+
+        dim_labels = {
+            "idi_dim1": "Dim 1: Source Lock-in",
+            "idi_dim2": "Dim 2: Access Complexity",
+            "idi_dim3": "Dim 3: System Dependency",
+            "idi_dim4": "Dim 4: Coping Deficit",
+            "idi_mean": "IDI Composite (0–100)",
+        }
+
+        profiles: Dict[str, pd.DataFrame] = {}
+
+        # ── By wealth quintile ────────────────────────────────────────────
+        if "wealth_quintile" in df.columns:
+            order = ["Poorest", "Poorer", "Middle", "Richer", "Richest"]
+            by_w  = (
+                df.groupby("wealth_quintile")[agg_cols]
+                .mean()
+                .reindex([q for q in order if q in df["wealth_quintile"].unique()])
+                .round(3)
+            )
+            by_w.columns = [dim_labels.get(c, c) for c in by_w.columns]
+            profiles["by_wealth"] = by_w
+            print("\n  IDI dimension profiles by wealth quintile:")
+            print(by_w.to_string())
+
+        # ── By urban/rural ────────────────────────────────────────────────
+        if "residence" in df.columns:
+            by_u  = (
+                df.groupby("residence")[agg_cols]
+                .mean()
+                .round(3)
+            )
+            by_u.columns = [dim_labels.get(c, c) for c in by_u.columns]
+            profiles["by_urban"] = by_u
+            print("\n  IDI dimension profiles by urban/rural:")
+            print(by_u.to_string())
+
+        # ── By water source ───────────────────────────────────────────────
+        if "water_source" in df.columns:
+            by_s  = (
+                df.groupby("water_source")[agg_cols]
+                .mean()
+                .sort_values("idi_mean", ascending=False)
+                .round(3)
+            )
+            by_s.columns = [dim_labels.get(c, c) for c in by_s.columns]
+            profiles["by_source"] = by_s
+            print("\n  IDI dimension profiles by water source:")
+            print(by_s.to_string())
+
+        # ── Overall summary row ───────────────────────────────────────────
+        overall = pd.DataFrame({
+            "Dimension": list(dim_labels.values()),
+            "Mean Score": [df[c].mean() for c in agg_cols],
+            "SD":         [df[c].std()  for c in agg_cols],
+            "PCA Loading": list(self.loadings.round(4)) + [np.nan],
+        }).round(3)
+        profiles["overall"] = overall
+        print("\n  Overall IDI dimension summary:")
+        print(overall.to_string(index=False))
+
+        return profiles
 
     def _save_outputs(self):
         # MC robustness summary
@@ -562,6 +680,12 @@ class IDIBuilder:
         self.validation_df.to_csv(p2, index=False)
         print(f"\n  MC summary → {p1}")
         print(f"  IDI validation → {p2}")
+
+        # Dimension profiles
+        for profile_name, profile_df in self.dim_profiles.items():
+            p = self.cfg.OUTPUT_DIR / "results" / f"idi_dim_profile_{profile_name}.csv"
+            profile_df.to_csv(p)
+            print(f"  IDI dim profile ({profile_name}) → {p}")
 
     @property
     def pca_loadings(self) -> pd.DataFrame:

@@ -96,12 +96,17 @@ def _social_terms(df: pd.DataFrame) -> str:
 
 class DescriptiveTables:
     """
-    Table 1a : Disruption rate by water source (overall)
-    Table 1b : Disruption rate by source × wealth quintile
-    Table 1c : Disruption rate by source × urban/rural
-    Table 1d : Disruption rate by source × region
-    Table 1e : Disruption rate by source × season  (NEW — absorbs seasonal table)
+    Table 1a : Disruption rate by every source — sub-types shown separately,
+               RR vs tube well for all, RR vs piped-combined for non-piped.
+    Table 1b : Disruption rate — all piped sub-types + tube well × wealth quintile
+    Table 1c : Disruption rate — all piped sub-types + tube well × urban/rural
+    Table 1d : Disruption rate — piped (combined) + tube well × region
+    Table 1e : Disruption rate — piped (combined) + tube well × season
+    Table 1f : Category summary (piped combined, tube well, others)
     """
+
+    PIPED_LABEL   = "All Piped (combined)"
+    TUBE_LABEL    = "Tube Well/Borehole"
 
     def __init__(self, df: pd.DataFrame, cfg: Config):
         self.df  = df
@@ -113,11 +118,12 @@ class DescriptiveTables:
         print("=" * 60)
 
         tables = {}
-        tables["1a_by_source"]        = self._table_by_source()
-        tables["1b_by_source_wealth"] = self._table_stratified("wealth_quintile")
-        tables["1c_by_source_urban"]  = self._table_stratified("residence")
-        tables["1d_by_source_region"] = self._table_stratified("region")
-        tables["1e_by_source_season"] = self._table_stratified("season")
+        tables["1a_by_source"]          = self._table_by_source()
+        tables["1b_by_source_wealth"]   = self._table_stratified("wealth_quintile")
+        tables["1c_by_source_urban"]    = self._table_stratified("residence")
+        tables["1d_by_source_region"]   = self._table_stratified("region")
+        tables["1e_by_source_season"]   = self._table_stratified("season")
+        tables["1f_category_summary"]   = self._table_category_summary()
 
         for name, tbl in tables.items():
             out = self.cfg.OUTPUT_DIR / "tables" / f"table_{name}.csv"
@@ -126,85 +132,318 @@ class DescriptiveTables:
 
         return tables
 
+    def _source_rate(self, sub: pd.DataFrame) -> Tuple[float, float]:
+        """Return (rate_pct, se_pct) for a subset."""
+        rate  = weighted_rate(sub, self.cfg.VAR_DISRUPTED)
+        p     = rate / 100
+        n_eff = sub["weight"].sum() ** 2 / (sub["weight"] ** 2).sum()
+        se    = np.sqrt(p * (1 - p) / max(n_eff, 1)) * 100
+        return round(rate, 1), round(se, 2)
+
     def _table_by_source(self) -> pd.DataFrame:
-        cfg     = self.cfg
+        """
+        Full source table: every sub-type shown individually.
+        Includes RR vs tube well and RR vs all-piped-combined.
+        Answers the reviewer question: why only tube well?
+        """
         df      = self.df
-        outcome = cfg.VAR_DISRUPTED
+        cfg     = self.cfg
+        piped   = cfg.PIPED_SOURCES
+
+        # Reference rates
+        tw_sub   = df[df["water_source"] == self.TUBE_LABEL]
+        pip_sub  = df[df["water_source"].isin(piped)]
+        tw_rate, _  = self._source_rate(tw_sub)   if len(tw_sub)  else (np.nan, np.nan)
+        pip_rate, _ = self._source_rate(pip_sub)  if len(pip_sub) else (np.nan, np.nan)
 
         rows = []
         for src in df["water_source"].dropna().unique():
             sub = df[df["water_source"] == src]
             if sub["weight"].sum() == 0:
                 continue
-            rate  = weighted_rate(sub, outcome)
-            p     = rate / 100
-            n_eff = sub["weight"].sum() ** 2 / (sub["weight"] ** 2).sum()
-            se    = np.sqrt(p * (1 - p) / n_eff) * 100
+            rate, se = self._source_rate(sub)
+            is_piped = src in piped
             rows.append({
-                "Water Source":        src,
-                "Weighted N (000s)":   round(sub["weight"].sum() / 1000, 1),
-                "Disruption Rate (%)": round(rate, 1),
-                "95% CI Lower":        round(rate - 1.96 * se, 1),
-                "95% CI Upper":        round(rate + 1.96 * se, 1),
+                "Water Source":           src,
+                "Type":                   "Piped sub-type" if is_piped
+                                          else ("Reference" if src == self.TUBE_LABEL
+                                          else "Non-piped"),
+                "n (HH)":                 len(sub),
+                "Weighted N (000s)":      round(sub["weight"].sum() / 1000, 1),
+                "Disruption %":           rate,
+                "95% CI":                 f"{max(0,rate-1.96*se):.1f}–{rate+1.96*se:.1f}",
+                "RR vs Tube Well":        round(rate / tw_rate, 2) if tw_rate else np.nan,
             })
 
         tbl = (pd.DataFrame(rows)
-               .sort_values("Disruption Rate (%)", ascending=False)
+               .sort_values("Disruption %", ascending=False)
                .reset_index(drop=True))
 
-        tw = tbl.loc[tbl["Water Source"] == "Tube Well/Borehole",
-                     "Disruption Rate (%)"]
-        if len(tw):
-            tbl["Relative Risk vs Tube Well"] = (
-                tbl["Disruption Rate (%)"] / float(tw.iloc[0])
-            ).round(2)
+        # Append combined-piped summary row
+        if len(pip_sub) and tw_rate:
+            pip_se = self._source_rate(pip_sub)[1]
+            tbl = pd.concat([
+                pd.DataFrame([{
+                    "Water Source":      "── All Piped (combined) ──",
+                    "Type":              "Piped combined",
+                    "n (HH)":            len(pip_sub),
+                    "Weighted N (000s)": round(pip_sub["weight"].sum() / 1000, 1),
+                    "Disruption %":      pip_rate,
+                    "95% CI":            f"{max(0,pip_rate-1.96*pip_se):.1f}–{pip_rate+1.96*pip_se:.1f}",
+                    "RR vs Tube Well":   round(pip_rate / tw_rate, 2),
+                }]),
+                tbl,
+            ], ignore_index=True)
 
-        print(f"\n  Table 1a — Disruption by source:")
+        print(f"\n  Table 1a — Disruption by source (all sub-types):")
         print(tbl.to_string(index=False))
         return tbl
 
     def _table_stratified(self, stratify_by: str) -> pd.DataFrame:
-        cfg     = self.cfg
+        """
+        Piped sub-types + tube well stratified by a grouping variable.
+        Shows each piped sub-type separately so the piped-yard/plot anomaly
+        is visible within each stratum.
+        """
         df      = self.df
+        cfg     = self.cfg
         outcome = cfg.VAR_DISRUPTED
 
         if stratify_by not in df.columns:
             return pd.DataFrame()
 
-        df_filt = df[df["water_source"].isin(
-            ["Piped Water", "Tube Well/Borehole"])]
+        # Sources to show: all piped sub-types + tube well
+        show_sources = cfg.PIPED_SOURCES + [self.TUBE_LABEL]
+        df_filt = df[df["water_source"].isin(show_sources)]
+
         rows = []
         for stratum in sorted(df_filt[stratify_by].dropna().unique()):
             sub = df_filt[df_filt[stratify_by] == stratum]
-            for src in ["Piped Water", "Tube Well/Borehole"]:
+            for src in show_sources:
                 src_sub = sub[sub["water_source"] == src]
                 if src_sub["weight"].sum() == 0:
                     continue
                 rows.append({
-                    stratify_by:       stratum,
-                    "Water Source":    src,
-                    "Disruption (%)":  round(weighted_rate(src_sub, outcome), 1),
-                    "N":               len(src_sub),
+                    stratify_by:      stratum,
+                    "Water Source":   src,
+                    "Disruption (%)": round(weighted_rate(src_sub, outcome), 1),
+                    "n":              len(src_sub),
                 })
 
         tbl = pd.DataFrame(rows)
         if tbl.empty:
             return tbl
+
         tbl_wide = tbl.pivot_table(
             index=stratify_by, columns="Water Source",
             values="Disruption (%)", aggfunc="first",
         )
-        if ("Piped Water" in tbl_wide.columns and
-                "Tube Well/Borehole" in tbl_wide.columns):
-            tbl_wide["Difference (pp)"] = (
-                tbl_wide["Piped Water"] - tbl_wide["Tube Well/Borehole"]
+
+        # Add difference columns for piped-combined vs tube well
+        piped_cols = [c for c in tbl_wide.columns if c in cfg.PIPED_SOURCES]
+        if piped_cols and self.TUBE_LABEL in tbl_wide.columns:
+            tbl_wide["All Piped avg (%)"] = tbl_wide[piped_cols].mean(axis=1).round(1)
+            tbl_wide["Piped−TW diff (pp)"] = (
+                tbl_wide["All Piped avg (%)"] - tbl_wide[self.TUBE_LABEL]
             ).round(1)
-            tbl_wide["Piped ÷ Tube Well"] = (
-                tbl_wide["Piped Water"] / tbl_wide["Tube Well/Borehole"]
+            tbl_wide["Piped÷TW RR"] = (
+                tbl_wide["All Piped avg (%)"] / tbl_wide[self.TUBE_LABEL]
             ).round(2)
+
         print(f"\n  Stratified ({stratify_by}):")
         print(tbl_wide.round(1).to_string())
         return tbl_wide
+
+    def _table_category_summary(self) -> pd.DataFrame:
+        """
+        Category-level summary: piped combined, tube well, and all other
+        named categories. Gives the 10,000-foot view for the paper intro.
+        """
+        df      = self.df
+        cfg     = self.cfg
+        outcome = cfg.VAR_DISRUPTED
+
+        categories = {
+            "All Piped (combined)":          cfg.PIPED_SOURCES,
+            "  Piped — Into Dwelling":        ["Piped — Into Dwelling"],
+            "  Piped — Yard/Plot":            ["Piped — Yard/Plot"],
+            "  Piped — Neighbour/Shared":     ["Piped — Neighbour/Shared"],
+            "  Piped — Public Tap/Standpipe": ["Piped — Public Tap/Standpipe"],
+            "Tube Well/Borehole":             ["Tube Well/Borehole"],
+            "Protected (well + spring)":      ["Protected Well", "Protected Spring"],
+            "Unprotected (well + spring)":    ["Unprotected Well", "Unprotected Spring"],
+            "Surface Water":                  ["Surface Water (river/lake/canal)"],
+            "Tanker/Cart":                    ["Tanker Truck", "Cart with Small Tank"],
+            "Bottled/RO":                     ["Bottled Water", "Community RO Plant"],
+            "Rainwater":                      ["Rainwater"],
+        }
+
+        tw_sub  = df[df["water_source"] == "Tube Well/Borehole"]
+        tw_rate = weighted_rate(tw_sub, outcome) if len(tw_sub) else np.nan
+
+        rows = []
+        for label, sources in categories.items():
+            sub = df[df["water_source"].isin(sources)]
+            if len(sub) == 0:
+                continue
+            rate, se = self._source_rate(sub)
+            rows.append({
+                "Category":          label,
+                "n (HH)":            len(sub),
+                "Disruption %":      rate,
+                "95% CI":            f"{max(0,rate-1.96*se):.1f}–{rate+1.96*se:.1f}",
+                "RR vs Tube Well":   round(rate / tw_rate, 2) if tw_rate else np.nan,
+            })
+
+        tbl = pd.DataFrame(rows)
+        print(f"\n  Table 1f — Category summary:")
+        print(tbl.to_string(index=False))
+        return tbl
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FINDING 1b — IDI DIMENSION PROFILES
+# ─────────────────────────────────────────────────────────────────────────────
+
+class IDIDimensionTable:
+    """
+    Per-dimension IDI breakdown, mirroring REPI paper (Tikadar & Swami 2025)
+    Fig. 11 structure.
+
+    Motivation: the composite IDI score masks which structural dimension
+    drives lock-in for different groups. A reviewer will ask: "Is the piped
+    paradox because of source lock-in (Dim 1), or coping deficit (Dim 4)?"
+    This table answers that directly.
+
+    Outputs:
+      table_1f_idi_dim_by_wealth.csv   — Dims 1–4 + IDI by wealth quintile
+      table_1g_idi_dim_by_urban.csv    — Dims 1–4 + IDI by urban/rural
+      table_1h_idi_dim_by_source.csv   — Dims 1–4 + IDI by water source
+      table_1i_idi_dim_overall.csv     — Overall means + PCA loadings
+    """
+
+    DIM_LABELS = {
+        "idi_dim1": "Dim 1: Source Lock-in (0–3)",
+        "idi_dim2": "Dim 2: Access Complexity (0–3)",
+        "idi_dim3": "Dim 3: System Dependency (0–3)",
+        "idi_dim4": "Dim 4: Coping Deficit (0–3)",
+        "idi_mean": "IDI Composite (0–100)",
+    }
+
+    def __init__(self, df: pd.DataFrame, cfg: Config,
+                 dim_profiles: Optional[Dict] = None):
+        self.df           = df
+        self.cfg          = cfg
+        self.dim_profiles = dim_profiles  # passed from IDIBuilder if available
+
+    def run_all(self) -> Dict[str, pd.DataFrame]:
+        print("\n" + "=" * 60)
+        print("ANALYSIS — Finding 1b: IDI Dimension Profiles")
+        print("=" * 60)
+
+        tables = {}
+
+        # Use pre-computed profiles from IDIBuilder if available,
+        # otherwise recompute from the dataframe directly.
+        if self.dim_profiles:
+            for profile_name, profile_df in self.dim_profiles.items():
+                key = f"idi_dim_{profile_name}"
+                tables[key] = profile_df
+                out = self.cfg.OUTPUT_DIR / "tables" / f"table_1_{profile_name[3:]}_idi_dims.csv"
+                profile_df.to_csv(out)
+                print(f"  Saved → {out}")
+        else:
+            tables.update(self._compute_and_save())
+
+        # Always produce the disruption-annotated dimension table
+        tables["idi_dim_disruption"] = self._disruption_by_dim_quartile()
+
+        return tables
+
+    def _compute_and_save(self) -> Dict[str, pd.DataFrame]:
+        """Fallback: recompute profiles from df if IDIBuilder profiles not passed."""
+        df      = self.df
+        cfg     = self.cfg
+        dim_cols = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4", "idi_mean"]
+        dim_cols = [c for c in dim_cols if c in df.columns]
+        tables  = {}
+
+        if "wealth_quintile" in df.columns:
+            order = ["Poorest", "Poorer", "Middle", "Richer", "Richest"]
+            t = (df.groupby("wealth_quintile")[dim_cols].mean()
+                   .reindex([q for q in order if q in df["wealth_quintile"].unique()])
+                   .round(3))
+            t.columns = [self.DIM_LABELS.get(c, c) for c in t.columns]
+            tables["idi_dim_by_wealth"] = t
+            out = cfg.OUTPUT_DIR / "tables" / "table_1f_idi_dim_by_wealth.csv"
+            t.to_csv(out)
+            print(f"\n  IDI dims by wealth → {out}")
+            print(t.to_string())
+
+        if "residence" in df.columns:
+            t = (df.groupby("residence")[dim_cols].mean().round(3))
+            t.columns = [self.DIM_LABELS.get(c, c) for c in t.columns]
+            tables["idi_dim_by_urban"] = t
+            out = cfg.OUTPUT_DIR / "tables" / "table_1g_idi_dim_by_urban.csv"
+            t.to_csv(out)
+            print(f"\n  IDI dims by urban/rural → {out}")
+            print(t.to_string())
+
+        if "water_source" in df.columns:
+            t = (df.groupby("water_source")[dim_cols].mean()
+                   .sort_values("idi_mean", ascending=False)
+                   .round(3))
+            t.columns = [self.DIM_LABELS.get(c, c) for c in t.columns]
+            tables["idi_dim_by_source"] = t
+            out = cfg.OUTPUT_DIR / "tables" / "table_1h_idi_dim_by_source.csv"
+            t.to_csv(out)
+            print(f"\n  IDI dims by water source → {out}")
+            print(t.to_string())
+
+        return tables
+
+    def _disruption_by_dim_quartile(self) -> pd.DataFrame:
+        """
+        For each dimension, split households into low/high halves and report
+        weighted disruption rate per half. This directly shows which dimension
+        most strongly tracks disruption — the reviewer-facing version of
+        discriminant validity.
+
+        Output columns:
+          Dimension | Low-half disruption (%) | High-half disruption (%) | Difference (pp)
+        """
+        df      = self.df
+        cfg     = self.cfg
+        outcome = cfg.VAR_DISRUPTED
+
+        dim_cols = [c for c in ["idi_dim1","idi_dim2","idi_dim3","idi_dim4"]
+                    if c in df.columns and outcome in df.columns]
+
+        rows = []
+        for col in dim_cols:
+            median_val = df[col].median()
+            lo = df[df[col] <= median_val]
+            hi = df[df[col] >  median_val]
+
+            lo_rate = weighted_rate(lo, outcome) if len(lo) > 0 else np.nan
+            hi_rate = weighted_rate(hi, outcome) if len(hi) > 0 else np.nan
+
+            rows.append({
+                "Dimension":              self.DIM_LABELS.get(col, col),
+                "Low-half disruption (%)":  round(lo_rate, 1) if not np.isnan(lo_rate) else np.nan,
+                "High-half disruption (%)": round(hi_rate, 1) if not np.isnan(hi_rate) else np.nan,
+                "Difference (pp)":          round(hi_rate - lo_rate, 1)
+                                            if not (np.isnan(hi_rate) or np.isnan(lo_rate))
+                                            else np.nan,
+            })
+
+        tbl = pd.DataFrame(rows).sort_values("Difference (pp)", ascending=False)
+        out = cfg.OUTPUT_DIR / "tables" / "table_1i_dim_disruption_gradient.csv"
+        tbl.to_csv(out, index=False)
+        print(f"\n  Disruption gradient by dimension:")
+        print(tbl.to_string(index=False))
+        print(f"  Saved → {out}")
+        return tbl
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -736,8 +975,8 @@ class PSMAnalysis:
         df  = self.df.copy()
 
         df_psm = df[df["water_source"].isin(
-            ["Piped Water", "Tube Well/Borehole"])].copy()
-        df_psm["treatment"] = (df_psm["water_source"] == "Piped Water").astype(int)
+            cfg.PIPED_SOURCES + ["Tube Well/Borehole"])].copy()
+        df_psm["treatment"] = df_psm["piped_flag"].astype(int)
 
         covariates = [
             "wealth_q_num", "urban", "hh_size", "children_u5",
@@ -871,6 +1110,45 @@ class ReportGenerator:
         lines += ["", "**Finding**: Piped water sits near the top of the "
                   "disruption ranking despite being classified as improved.", ""]
 
+        # Finding 1b — IDI dimension profiles
+        lines += ["## FINDING 1b — IDI Dimension Profiles", "",
+                  "Per-dimension breakdown reveals *which* structural factor "
+                  "drives lock-in for different groups. Analogous to REPI "
+                  "dimension-level reporting (Tikadar & Swami 2025, Fig. 11).",
+                  "Higher score = more locked-in / less able to cope.", ""]
+
+        t_wealth = self.all_tables.get("idi_dim_by_wealth")
+        if t_wealth is not None:
+            lines += ["### By Wealth Quintile", ""]
+            lines.append(t_wealth.to_markdown())
+            lines += ["",
+                      "> Interpretation: If Dim 4 (Coping Deficit) rises "
+                      "sharply from Richer→Poorest while Dim 1 (Source Lock-in) "
+                      "is flat, the paradox is primarily a coping story, not a "
+                      "source-diversity story.", ""]
+
+        t_urban = self.all_tables.get("idi_dim_by_urban")
+        if t_urban is not None:
+            lines += ["### By Urban / Rural", ""]
+            lines.append(t_urban.to_markdown())
+            lines += ["",
+                      "> Interpretation: Urban households typically score higher "
+                      "on Dim 2 (Access Complexity) because in-dwelling piped "
+                      "water leaves them with zero fetching experience when the "
+                      "tap fails.", ""]
+
+        t_grad = self.all_tables.get("idi_dim_disruption")
+        if t_grad is not None:
+            lines += ["### Disruption Gradient by Dimension", "",
+                      "Households split at each dimension's median; "
+                      "difference = high-half minus low-half disruption rate.", ""]
+            lines.append(t_grad.to_markdown(index=False))
+            lines += ["",
+                      "> The dimension with the largest difference is the "
+                      "primary driver of the IDI-disruption relationship.", ""]
+
+        lines += ["---", ""]
+
         # Finding 2
         lines += ["## FINDING 2 — IDI Regression (with social controls)", ""]
         t2 = self.all_tables.get("regression_coefs")
@@ -950,7 +1228,13 @@ class Analyzer:
         self.df  = df
         self.cfg = cfg
 
-    def run_all(self, dist_df: pd.DataFrame):
+    def run_all(self, dist_df: pd.DataFrame,
+                idi_dim_profiles: Optional[Dict] = None):
+        """
+        idi_dim_profiles: pass IDIBuilder.dim_profiles here so the dimension
+        profile tables use the pre-computed values rather than recomputing.
+        Call as: analyzer.run_all(district_df, idi_dim_profiles=idi_builder.dim_profiles)
+        """
         print("\n" + "=" * 60)
         print("STEP 5 — Running all analyses")
         print("=" * 60)
@@ -960,6 +1244,11 @@ class Analyzer:
         # Finding 1
         desc   = DescriptiveTables(self.df, self.cfg)
         all_tables.update(desc.run_all())
+
+        # Finding 1b — IDI dimension profiles (new)
+        idi_dims = IDIDimensionTable(self.df, self.cfg,
+                                     dim_profiles=idi_dim_profiles)
+        all_tables.update(idi_dims.run_all())
 
         # Finding 2
         idi_reg = IDIRegression(self.df, self.cfg)

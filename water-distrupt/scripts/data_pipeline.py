@@ -276,13 +276,24 @@ class DataProcessor:
         else:
             self.df["alt_source"] = "No Other Source"
 
-        self.df["piped_flag"]    = (self.df["water_source"] == "Piped Water").astype(int)
-        self.df["tube_well_flag"] = (self.df["water_source"] == "Tube Well/Borehole").astype(int)
-        self.df["improved_flag"] = self.df["water_source"].isin([
-            "Piped Water", "Tube Well/Borehole",
-            "Protected Well/Spring", "Protected Spring",
-            "Bottled Water", "Community RO Plant",
-        ]).astype(int)
+        self.df["piped_flag"]    = self.df["water_source"].isin(
+            cfg.PIPED_SOURCES
+        ).astype(int)
+        self.df["tube_well_flag"] = (
+            self.df["water_source"] == "Tube Well/Borehole"
+        ).astype(int)
+        self.df["improved_flag"] = self.df["water_source"].isin(
+            cfg.PIPED_SOURCES + [
+                "Tube Well/Borehole",
+                "Protected Well", "Protected Spring",
+                "Bottled Water", "Community RO Plant",
+            ]
+        ).astype(int)
+
+        # Piped sub-type: one of the 4 piped labels or "Non-piped"
+        self.df["piped_subtype"] = self.df["water_source"].where(
+            self.df["water_source"].isin(cfg.PIPED_SOURCES), other="Non-piped"
+        )
 
         if cfg.VAR_TIME_TO_WATER in self.df.columns:
             self.df["time_to_water_min"] = pd.to_numeric(

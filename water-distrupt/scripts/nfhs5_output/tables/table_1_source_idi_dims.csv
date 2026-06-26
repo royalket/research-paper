@@ -1,0 +1,16 @@
+water_source,Dim 1: Source Lock-in,Dim 2: Access Complexity,Dim 3: System Dependency,Dim 4: Coping Deficit,IDI Composite (0–100)
+Piped — Neighbour/Shared,3.0,3.0,2.0,1.936,75.853
+Piped — Yard/Plot,3.0,3.0,2.0,1.376,71.123
+Piped — Public Tap/Standpipe,3.0,1.603,2.0,1.786,71.089
+Piped — Into Dwelling,3.0,3.0,2.0,0.635,64.868
+Cart with Small Tank,0.0,2.409,3.0,0.0,45.152
+Tanker Truck,0.0,2.281,3.0,0.0,44.836
+Bottled Water,0.0,2.127,3.0,0.0,44.442
+Protected Well,0.0,2.981,1.0,0.0,22.61
+Protected Spring,0.0,2.857,1.0,0.0,22.296
+Community RO Plant,0.0,2.479,1.0,0.0,21.332
+Unprotected Well,0.0,2.978,0.0,0.0,11.364
+Surface Water (river/lake/canal),0.0,2.844,0.0,0.0,11.03
+Unprotected Spring,0.0,2.762,0.0,0.0,10.823
+Other Source,0.0,2.726,0.0,0.0,10.723
+Tube Well/Borehole,0.0,2.208,0.0,0.0,9.44

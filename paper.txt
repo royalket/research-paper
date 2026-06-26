@@ -1,0 +1,1623 @@
+Utilities Policy 93 (2025) 101878
+Contents lists available at ScienceDirect
+Utilities Policy
+journal homepage: www.elsevier.com/locate/jup
+Full-length article
+Understanding the variability of residential energy poverty in India
+Biswajit Tikadar*
+, Deepika Swami
+Department of Sustainable Energy Engineering, Indian Institute of Technology Kanpur, Kanpur, India
+A R T I C L E I N F O
+Handling Editor: Janice A. Beecher
+Keywords:
+Energy poverty
+Principal component analysis (PCA)
+Residential energy poverty index (REPI)
+India
+Multiple linear regression (MLR)
+A B S T R A C T
+Residential energy poverty is the lack of accessible, reliable, clean energy services. Researchers have not reached
+a consensus about defining and measuring energy poverty, leading to ineffective energy-related policy formulation.
+Existing approaches simplify energy poverty to a "yes-no" approach, neglecting its multidimensional
+nature. The subjective parameters and thresholds used further introduce uncertainty and bias. We addressed this
+gap by formulating a comprehensive Residential Energy Poverty Index (REPI) for Indian states by adopting a
+multidimensional approach, including clean and green energy, energy efficiency, accessibility and reliability,
+and appliances. The current approach focuses on energy availability beyond basic needs and should look at the
+broader dimensions of quality of life, socioeconomic well-being, education, and environmental sustainability.
+The work is based on the Indian residential energy survey conducted by CEEW, which included 14,850 households
+across 21 Indian states. REPI was constructed by assigning weightage to different variables across four
+dimensions using Principal Component Analysis. Multiple Linear Regression was utilized to identify the socioeconomic
+factors impacting REPI.
+Findings reveal that enhancing energy efficiency and decentralized solar power, particularly in states like
+Chhattisgarh and Jharkhand, can significantly improve energy access and reliability. Factors such as primary
+education and female-headed households correlate with lower energy poverty, while poor housing, rural areas,
+marginal groups, and primary economic activities like agriculture correlate with higher energy poverty. The
+findings highlight the importance of tailored state-specific policies like decentralized renewable energy, energy
+cleanliness and awareness campaigns to address residential energy poverty in India.
+1. Introduction
+India is the world’s third-largest primary energy consumer (IEA,
+2021). Lack of access to clean and intermittent energy supply significantly
+impacts millions of people’s daily lives, hindering development
+and worsening socioeconomic inequalities. This situation increases the
+dependency on inefficient and hazardous energy alternatives such as
+kerosene lamps, dung cakes, and agricultural waste for cooking and
+heating. These energy alternatives contribute to indoor air pollution and
+cause respiratory illness, especially among women and children who
+spend most of their time using traditional cooking stoves (Sadath and
+Acharya, 2017). In 2019, household air pollution led to 6.1 lakh deaths
+in India (Pandey et al., 2021).
+To address the problem of indoor air pollution, the central government
+launched the PM Ujjwala scheme in 2016, adding 95.9 million new
+LPG connections as of July 2023 (PIB, 2023a). Similarly, the Pradhan
+Mantri Sahaj Bijli Har Ghar Yojana (Saubhagya) scheme has helped 28.6
+million households get electricity connections since 2017 (PIB, 2023b).
+While these programs have improved energy accessibility, 40 million
+people still lack stable electricity and rely on traditional biomass fuels
+for cooking and heating (IEA, 2021). This burden falls disproportionately
+on women, who collect biomass for cooking, limiting their
+educational opportunities and participation in economic activities
+(Barnes and Sen, 2004). Additionally, unsustainable harvesting of firewood
+and crop residues puts pressure on fragile ecosystems, leading to
+deforestation, environmental degradation and climate change. This poor
+accessibility and unreliability of electricity supply and use of traditional
+cooking sources result in energy poverty at the household level. Understanding
+energy poverty at the household level is essential for
+identifying and overcoming barriers to equitable energy access, which is
+crucial for improving living standards, reducing socioeconomic
+inequality, and encouraging sustainable economic growth.
+India’s diverse geography and socioeconomic conditions result in
+contrasting levels of energy poverty, which require targeted, state-
+* Corresponding author. Department of Sustainable Energy Engineering IIT Kanpur, Kanpur, 208016, India.
+E-mail addresses: btikadar22@iitk.ac.in (B. Tikadar), dswami@iitk.ac.in (D. Swami).
+https://doi.org/10.1016/j.jup.2024.101878
+Received 14 June 2024; Received in revised form 8 December 2024; Accepted 8 December 2024
+Available online 30 December 2024
+0957-1787/© 2024 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+B. Tikadar and D. Swami specific interventions to reduce it. Formulating state-specific policies to
+target energy poverty first requires an understanding of the way energy
+poverty is being measured and evaluated by various studies and the
+underlying gaps.
+2. Literature review
+Efforts have been made to define and construct a residential energy
+poverty index in literature (Bekele et al., 2015; Gupta et al., 2020;
+Khandker et al., 2010; Nayan Yadava and Sinha, 2019; Nussbaumer
+et al., 2012; Okushima, 2016; Pachauri et al., 2004; Thomson et al.,
+2017), still there is a lack of common consensus on what defines energy
+poverty and how it is measured. There are different ways in which energy
+poverty is defined and measured by various studies, which are
+mentioned as follows.
+Residential energy poverty is frequently associated with access to
+energy services for cooking and lighting (Brew-Hammond, 2010; Nayan
+Yadava and Sinha, 2019; Winkler et al., 2011). Modern and clean energy
+sources, such as liquified petroleum gas (LPG) and traditional fuels like
+firewood and dung cakes, are considered energy sources for cooking
+within the household (Brew-Hammond, 2010; Nayan Yadava and Sinha,
+2019), and grid connection for the provision of electricity for lighting is
+considered as energy source within the household (Winkler et al., 2011).
+This index is binary, i.e., whether or not one has access and, thereby,
+does not clarify their usage pattern as few households prefer using
+cookstoves despite the availability of LPG. Second, it also lacks the
+incorporation of crucial factors such as frequency of power outages,
+low-voltage situations, uninterrupted supply, use of kerosene lamps, and
+frequency of LPG refills.
+Pachauri et al. (2004) measured energy poverty by considering the
+energy required to meet fundamental needs. The final energy
+consumption-based energy poverty index has also been used in earlier
+studies (Goldemberg, 1990; Krugmann and Goldemberg, 1983). This
+approach also focuses on only the availability of energy services and
+does not consider crucial factors such as energy accessibility, reliability,
+and usage patterns. Second, it yields variable results across urban and
+rural areas, income groups, and individuals. These variations lead to
+challenges in establishing a uniform and comprehensive assessment of
+energy poverty.
+Energy poverty is also being assessed using the expenditure
+approach, which involves calculating a ratio of household income to
+energy expenditure (Leach, 1987; Okushima, 2016; Thomson et al.,
+2017) or creating a threshold of minimum spend on energy services for
+decent living (Barnes et al., 2011). This method helps evaluate the
+affordability of energy for households and provides insights into their
+energy-related financial burden. Focusing solely on affordability overlooks
+the broader issue of physical access to energy services, leading to
+an incomplete understanding of household energy poverty. Also, as
+household income increases, spending on energy services tends to
+decrease due to adopting modern and efficient appliances (Barnes et al.,
+2011), complicating the establishment of a threshold for urban and rural
+areas. Karpinska and ´
+Smiech (2021) try to measure the depth of energy
+poverty in Poland with modelled energy cost to estimate the depth and
+rate of energy poverty in case of energy transition from dirty fuels to
+clean fuels. Adom et al. (2021) explored the link between development
+outcomes and energy poverty (measured by energy costs and pricing)
+while also considering the potential shift to green energy. The need for
+price data for different energy sources, which tends to change with
+global supply, makes applying the index nationally challenging.
+Numerous studies have measured energy poverty by formulating a
+Multidimensional Energy Poverty Index (MEPI), which focuses on energy
+deprivation across multiple dimensions (Abbas et al., 2020; Bekele
+et al., 2015; Gupta et al., 2020; Mendoza et al., 2019; Nussbaumer et al.,
+2012; Sadath and Acharya, 2017; Santill´
+an et al., 2020). It encompasses
+various aspects of energy access and usage, including cooking, lighting,
+the availability of household appliances, access to entertainment and
+Utilities Policy 93 (2025) 101878
+educational resources, and communication services. MEPI’s multidimensional
+framework allows for a more comprehensive assessment of
+energy poverty, recognizing that access to energy extends beyond basic
+needs and plays a crucial role in overall well-being and development.
+Rao et al. (2022) created an energy poverty index for the Next 11 (N11)
+countries (Bangladesh, Egypt, Indonesia, Iran, Mexico, Nigeria,
+Pakistan, Philippines, South Korea, Turkey, and Vietnam), considering
+energy affordability, availability, and cleanability. Abbas et al. (2020)
+used an adjusted multidimensional energy poverty index comprising six
+indices for country-wise analysis. Sadath and Acharya (2017) created an
+energy poverty index by incorporating three main dimensions: lighting,
+cooking, and supplementary measures, each carrying an equivalent
+weight of 33.33%. Thermal comfort and space heating are also included
+in the dimensions for the creation of MEPI (Cedano et al., 2021; Mendoza
+et al., 2019; Qurat-ul-Ann and Mirza, 2021; Santill´
+an et al., 2020).
+Though studies include various dimensions for creating an energy
+poverty index using MEPI, the binary approach of MEPI makes it an
+access-based matrix. Also, the subjective method to assign weights for
+different dimensions is sometimes arbitrary.
+The Poor People’s Energy Outlook 2010; Practical Action (2010)
+introduces an energy access index based on six essential energy services
+and a hybrid set of indicators quantifying qualitative aspects in household
+fuels, electricity, and mechanical power supply dimensions. The
+energy poverty index is primarily associated with the affordability and
+accessibility of energy services. The limitation of this method is that the
+relative importance assigned to different indices and the specific
+threshold values are often arbitrarily determined by the authors or researchers.
+This subjectivity can introduce uncertainty and potential bias
+in assessing energy poverty, as these parameters may vary from one
+study to another.
+Similarly, the Multi-tier Energy Access Tracking Framework (MTF)
+(Angelou and Bhatia, 2015) defines access to electricity and modern
+energy cooking services based on adequacy, reliability, affordability,
+and safety. However, MTF relies on subjective criteria for tier thresholds,
+and there are challenges in accurately converting the qualitative
+ranking of different tiers into quantitative measures of energy access.
+Gupta et al. (2020) tried to capture the diverse aspects of energy
+poverty within households by considering fifteen indices across energy
+affordability, accessibility, and availability of appliances. It used a scientific
+approach (i.e., PCA) for assigning weights. However, several
+limitations in the study need further attention. First, most appliance
+indicators used are binary, which might oversimplify household appliance
+ownership and usage diversity. Also, it does not focus on the energy
+sources used for lighting by different groups. It also lacks an examination
+of the reliability of electricity connections, as key indicators such as
+the frequency of low voltage days and power outages are not included.
+Lastly, the study does not investigate the socioeconomic linkages between
+household poverty and energy deprivation. Table 1 shows the
+different indicators used in previous studies.
+India’s rapid development and technological progress call for a “new
+normal” in the definition of energy poverty, i.e., looking beyond the
+availability and affordability with a focus on the quality and reliability
+of energy services used by each household in India. Current approaches,
+such as the Multidimensional Energy Poverty Index, often reduce energy
+poverty to a simplified or binary metric, overlooking the multidimensional
+nature of energy access, reliability, and efficiency, especially in
+the Indian context. The subjective biases in choosing the threshold led to
+challenges establishing a uniform and comprehensive assessment of
+energy poverty. India faces unique challenges, such as regional disparities,
+urban-rural divides in energy access, and reliance on inefficient
+appliances. For example, access to electricity may vary significantly
+between states and even electrified households in rural areas may
+experience unreliable or inefficient energy services, which is mostly
+overlooked by the existing studies (Bekele et al., 2015; Gupta et al.,
+2020; Khandker et al., 2010; Nayan Yadava and Sinha, 2019; Nussbaumer
+et al., 2012; Okushima, 2016; Pachauri et al., 2004; Thomson
+2
+3
+Table 1
+Indicator used in previous studies.
+Sl. No Authors Country Indicators Relationship with socioeconomic variables
+Clean and green energy Electricity access and reliability Energy appliances Energy efficiency
+a b c d e f g h i j k l m n o p q r s t u v w
+1 Pachauri et al. (2004) India ✓ ✓ ✓ ✓ ✓ ✓
+2 Thomson et al. (2017) EU ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+3 Barnes et al. (2011) Bangladesh ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+4 Karpinska and ´
+Smiech (2021) Poland ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+5 Adom et al. (2021) Ghana ✓ ✓ ✓ ✓ ✓
+6 Abbas et al. (2020) Six South Asian country ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+7 Bekele et al. (2015) Ethiopia ✓ ✓ ✓ ✓ ✓ ✓ ✓
+8 Ssennono et al. (2021) Uganda ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+9 Adusah-Poku and Takeuchi (2019) Ghana ✓ ✓ ✓ ✓ ✓
+10 Jayasinghe et al. (2021) Sri Lanka ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+11 Gowon Edoumiekumo et al. (2013) Nigeria ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+12 Crentsil et al. (2019) Ghana ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+13 Cedano et al. (2021) Mexico ✓ ✓ ✓ ✓ ✓
+14 Che et al. (2021) 125 countries ✓ ✓ ✓ ✓
+15 Bonatz et al. (2019) China and Germany ✓ ✓ ✓ ✓ ✓
+16 Nayan Yadava and Sinha (2019) Madhya Pradesh, India ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+17 Angelou and Bhatia (2015) ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+18 Cedano et al. (2021) Mexico ✓ ✓ ✓ ✓ ✓
+19 Practical Action (2010) Africa ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓
+20 Qurat-ul-Ann and Mirza (2021) Pakistan ✓ ✓ ✓ ✓ ✓ ✓
+21 Gupta et al. (2020) India ✓ ✓ ✓ ✓ ✓ ✓
+22 Rao et al. (2022) N11 countries ✓ ✓ ✓ ✓ ✓
+23 Mendoza et al. (2019) Philippines ✓ ✓ ✓ ✓ ✓
+24 Nussbaumer et al. (2012) African countries ✓ ✓ ✓ ✓ ✓
+25 Sadath and Acharya (2017) India ✓ ✓ ✓ ✓ ✓ ✓
+26 Santill´
+an et al. (2020) 7 Latin American Countries ✓ ✓ ✓ ✓ ✓ ✓ ✓
+a: Fuel stacking; b: Electricity based cooking; c: Traditional biomass fuels; d: PNG/LPG use for cooking; e: Years of grid connection; f: Electricity available during 6 p.m.–12 a.m.; g: Low voltage days; h: Power reliability
+(monthly power cuts); i: Grid supply; j: Number of communication appliances; k: Number of high energy appliance; l: Number of lights; m: Number of fans; n: Percentage of star-rated fans; o: Percentage of LED lights; p:
+Energy efficiency rating of high energy appliances; q: Area of residence r: Gender; s: Education; t: House type; u: Caste; v: Income source; w: Monthly expenditure.
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+B. Tikadar and D. Swami et al., 2017). Similarly, appliance ownership is critical in transforming
+available energy into functional end-use services. It directly contributes
+to improved living standards, enhanced productivity, and greater comfort,
+reducing the prevalence of energy poverty.
+This study addresses these limitations by introducing a comprehensive
+Residential Energy Poverty Index (REPI) that not only includes
+clean and green energy sources but also considers energy efficiency
+(indicators like the adoption of energy-efficient appliances like fans,
+lights and high energy-use appliances), appliance ownership (indicators
+like ownership of communication devices, high energy-use appliances),
+and accessibility and reliability of energy supply(indicators like low
+voltage days, power outages, years of grid connection). These dimensions
+provide a broader context to energy poverty and are beyond
+solely measuring energy poverty by accessibility and affordability. They
+are specifically chosen to reflect India’s multifaceted energy poverty.
+The current study contributes to the existing literature in three significant
+ways. First, it expands the scope by considering more relevant
+energy efficiency indicators, clean and green energy, and energy appliances.
+The study looks beyond traditional binary metrics, considering
+that energy poverty is not just about access to essential energy but also
+includes aspects such as quality of life, socioeconomic well-being and
+environmental sustainability, which is reflected in the selection of indicators
+under energy efficiency, clean and green energy and energy
+appliance domain. Second, the study measures energy poverty in four
+dimensions (clean and green energy, electricity access and reliability,
+energy appliances and energy efficiency) and creates separate indices
+using Principal Component Analysis (PCA) based on these four dimensions.
+A state may perform well in one index and poorly in another,
+resulting in an average score in the overall residential energy poverty
+index but not revealing specific areas of deficiency. This approach of
+categorizing indicators into different indices allows us to identify which
+states lack particular dimensions and will help formulate state-specific
+targeted policies and interventions. Third, the study identifies specific
+socioeconomic factors that correlate with higher or lower levels of energy
+poverty, offering valuable information to policymakers aiming to
+reduce energy poverty across Indian states.
+The REPI framework aligns closely with India’s commitment to
+Sustainable Development Goal 7 (SDG 7) to ensure access to affordable,
+reliable, sustainable, and modern energy for all. By capturing multidimensional
+aspects such as energy accessibility, reliability, efficiency,
+and clean energy use, REPI offers a comprehensive approach to identifying
+and addressing energy poverty. It is particularly relevant in India,
+where electrification has improved, but challenges such as unreliable
+supply, energy-inefficient devices and fuels, urban-rural divides, and
+regional disparities persist. In this context, REPI addresses critical gaps
+by highlighting disparities between states and urban-rural areas,
+enabling targeted policy interventions. It provides data-driven insights
+into the reliability and quality of energy services, aspects often overlooked
+in existing indices and promotes clean energy adoption and
+efficient appliance use, aligning with India’s SDG 7 commitment.
+2.1. Objectives
+In line with this, the current study aims to address the following
+objectives:
+1. To formulate a comprehensive Residential Energy Poverty Index
+(REPI) that evaluates energy poverty across Indian states by incorporating
+nineteen indicators divided into four dimensions of energy
+poverty: clean energy, electricity access and reliability, energy appliances,
+and energy efficiency.
+2. To analyse various factors contributing towards the increase in residential
+energy poverty among Indian households, highlighting disparities
+across states and between urban and rural areas.
+By capturing the multidimensional aspects of energy poverty, this
+Utilities Policy 93 (2025) 101878
+study aims to serve as an indicative tool for identifying regional energy
+poverty disparities and their underlying causes. REPI can help policymakers
+develop specific and practical solutions to address the unique
+challenges Indian states face across different dimensions of energy
+poverty.
+3. Data and Methodology
+The 2020 Indian Residential Energy Survey (IRES), conducted by the
+Council on Energy, Environment, and Water (CEEW) (Agrawal et al.,
+2021), is used in this study. The survey provides details of access to and
+energy consumption in Indian households through nationally representative
+sampling. The IRES 2020 encompassed 14,850 diverse urban
+and rural households spanning 152 districts across India’s 21 most
+populous states. The cumulative population of the surveyed states constitutes
+a substantial portion, i.e. 97 per cent, of the overall Indian
+population. It signifies the comprehensive nature of the survey by
+encompassing the demographic characteristics, energy consumption
+behaviour and energy accessibility from regions home to most of India’s
+people. Data collected from these surveyed states is highly representative
+of the population and offers valuable insights into the country’s
+population dynamics, economic factors, and other relevant aspects
+related to energy poverty that pertain to the nation.
+The IRES employed a stratified multistage probability design for the
+survey sampling. The IRES implemented a stratification strategy based
+on urbanization rates and populations to capture the diverse characteristics
+of sampled districts. The districts within each state were organized
+by population strength, and strata were created with
+approximately equal populations. Then, two districts were sampled from
+each stratum using the probability proportional to size method. Within
+each chosen district, a dual-layered stratum approach was employed: (i)
+a rural stratum encompassing all rural areas based on the Census 2011
+(Chandramouli, 2011) classification, and (ii) an urban stratum encompassing
+all urban regions as defined by the Census 2011. Within these
+districts, 12 villages and urban wards were selected, maintaining proportionality
+to the district’s respective urban and rural populations. The
+allocation of villages and wards for sampling in urban and rural strata
+was determined by the proportion of the urban-rural population in the
+district according to Census (2011). The distribution of villages/wards at
+the stratum level was modified to be in multiples of two, guaranteeing a
+presence of at least two urban wards, even in districts primarily characterized
+as rural. In the selection process for rural and urban sectors,
+the sampling frame was derived from the respective lists of villages and
+urban wards in a district based on Census 2011 data. For the rural sector,
+villages were initially arranged in descending order according to the
+total number of households, and two sub-strata were created to achieve
+a roughly equal population distribution. Within each sub-stratum, the
+required number of sample villages (r/2) was selected using the probability
+proportional to size with replacement (PPSWR) method, where
+size refers to the total number of rural households in the village according
+to Census (2011), and r is the number of villages to be sampled.
+Villages with fewer than 50 households were excluded from the sampling
+frame to minimize the need for replacements due to inadequate
+sample size.
+For the urban sector, the list of urban wards in a district from Census
+(2011) served as the sampling frame. Like the rural sector, urban wards
+were arranged in descending order of total household numbers, and two
+sub-strata were formed with approximately equal populations. Within
+each urban sub-stratum, the required number of sample wards (u/2) was
+selected using the PPSWR strategy, where size represents the total
+number of households in the urban ward as per Census 2011, and u is the
+number of urban wards to be sampled. Wards with less than 50 households
+were excluded from the sampling frame. A random sampling of
+eight households was conducted in each village or ward, forming the
+ultimate stage units for analysis. Across all districts, an equivalent
+number of households (12 * 8 =96) were included in the sample. Among
+4
+B. Tikadar and D. Swami the sampled households, 34 per cent were in urban areas, while 66 per
+cent were in rural areas (Fig. 1). This meticulous sampling strategy was
+implemented to guarantee that the survey encompassed a diverse and
+representative cross-section of households, considering the variations in
+living conditions and energy consumption patterns among different
+districts and regions across India.
+The selection of districts in each state adheres to a population-based
+proportion, focusing on maintaining a balanced and equitable
+Utilities Policy 93 (2025) 101878
+representation of districts based on their population sizes within each
+state. This approach ensures that each state has a minimum of four and a
+maximum of sixteen districts. This consideration prevents the issue of
+over-sampling in states with larger populations, such as Uttar Pradesh,
+and under-sampling in smaller states, as seen in Uttarakhand. The
+number of districts designated for each state was adjusted to the nearest
+even multiple. The sole limitation of the dataset is that the survey did not
+encompass the northeastern states and the union territories of Leh and
+Fig. 1. Rural-Urban sampling share of the sampled households.
+5
+B. Tikadar and D. Swami Jammu. This study is, therefore, restricted to the 21 most populous
+states in India.
+Given that the study’s primary goal is to formulate a comprehensive
+residential energy poverty index, one of the most important methodological
+concerns is finding a complete set of indicators that accurately
+depict households’ energy conditions and consumption scenarios. We
+draw on prior research for this purpose (Gupta et al., 2020; Nussbaumer
+et al., 2012; Wang et al., 2015).
+3.1. Indicators
+The study explores how various dimensions contribute to the overall
+residential energy poverty index. The current study divides the indicators
+into four categories: clean and green energy, electricity access
+and reliability, energy appliance and energy efficiency. Each of these
+dimensions is important in assessing and addressing the dynamics of
+residential energy poverty.
+Clean and green energy: The clean and green energy index captures
+the transition from traditional biomass and fossil fuels to cleaner energy
+sources, a critical aspect of reducing energy poverty and its associated
+health impacts. It measures the proportion of clean and renewable energy
+sources in the household energy mix. It includes indicators such as
+the adoption of clean cooking fuels (e.g., LPG, electricity) (Abbas et al.,
+2020; Gowon Edoumiekumo et al., 2013; Santill´
+an et al., 2020), and
+reliance on traditional fuels (e.g., firewood, dung cake, diesel generators)(Crentsil
+et al., 2019; Gupta et al., 2020; Nayan Yadava and Sinha,
+2019). Reducing reliance on traditional biomass for cooking mitigates
+air pollution and improves health outcomes. A higher score in this index
+signifies a reduced dependence on polluting and unsustainable energy
+sources, leading to enhanced environmental sustainability, improved
+health outcomes, and a lower risk of energy poverty.
+Electricity access and reliability: This dimension depicts the challenges
+encountered by households in accessing electricity (Bonatz et al.,
+2019; Cedano et al., 2021; Culver, 2017; Jayasinghe et al., 2021;
+Nussbaumer et al., 2012). Regular and reliable access to electricity is a
+cornerstone of modern living and is directly linked to energy poverty. It
+encompasses metrics such as provision of grid supply, rate of power
+reliability, duration of power outages, voltage stability, and daily hours
+for availability of electricity. Grid supply availability indicates whether
+households are connected to the national grid, providing a fundamental
+measure of access to electricity. But despite the rapid grid connection,
+the study by Aklin et al. (2016) shows that rural households faced 11 h of
+electricity outages on average every day. Hence, indicators like power
+cuts and low voltage days become important in revealing the reliability
+and quality of that access. The number of hours electricity is available
+during peak usage times (6 pm–12 am) captures the effectiveness and
+reliability of the grid when demand is high, which is critical for
+household activities such as cooking, studying, and using electronic
+devices. The years of grid connection are important for measuring
+electricity reliability because they show how long a household has been
+connected to the power grid. This duration indicates whether there has
+been sufficient time to improve infrastructure and services, which can
+lead to better quality and stability over time. Access to electricity is
+essential for lighting, heating, cooling, and powering appliances. It
+supports economic activities, education, and healthcare and significantly
+enhances the overall quality of life. A higher score in this index
+denotes improved access to electricity, which is essential for fulfilling
+basic energy requirements, enhancing the quality of life, and mitigating
+the risk of energy poverty.
+Energy appliances: Appliances are critical in converting available
+energy into functional end-use services. This category groups indicators
+based on the ownership and usage of various household appliances,
+which indicate a household’s energy consumption pattern and standard
+of living. Access to energy appliances is a crucial dimension as it reflects
+the availability and use of modern energy technologies that can enhance
+productivity, improve living conditions, and contribute to
+Utilities Policy 93 (2025) 101878
+socioeconomic development (Adusah-Poku and Takeuchi, 2019; Crentsil
+et al., 2019; Gupta et al., 2020; Jayasinghe et al., 2021; Nussbaumer
+et al., 2012; Santill´
+an et al., 2020). Fewer fans and lights indicate
+insufficient access to cooling, lighting, and thermal comfort, affecting
+quality of life. Similarly, communication devices per household member
+reflect economic or infrastructural limitations, hindering convenience
+and digital inclusion. Ownership of appliances like refrigerators and
+washing machines indicates improved living standards in terms of
+convenience, hygiene, and food preservation. A higher score within this
+index indicates improved access to energy appliances that contribute to
+elevated living standards, increased productivity, and enhanced comfort,
+diminishing the prevalence of energy poverty.
+Energy efficiency: The vulnerability of households to energy poverty
+is significantly compounded by energy inefficiency, mainly attributable
+to substantial energy losses occurring within households (Li et al., 2021;
+Papada and Kaliampakos, 2019; Zhao et al., 2022). This category focuses
+on the efficiency of energy consumption within households. Adopting
+energy-efficient appliances like fans, lights, and high energy-use appliances
+helps reduce energy consumption and lower household energy
+bills, leading to significant cost savings and increasing energy affordability.
+Improved energy efficiency also ensures better resource management.
+High values within this index signify a greater integration of
+energy-efficient appliances, leading to decreased energy consumption
+and lower household utility bills. It reflects the degree of investment in
+energy-efficient technologies and the capacity for energy conservation,
+thereby contributing to endeavours aimed at alleviating energy poverty.
+The interaction of these dimensions is complex, and an overall
+assessment is required to estimate residential energy poverty accurately.
+This multidimensional structure provides a comprehensive base for
+addressing the complexities of energy poverty. All the indicators are
+discussed further in detail in Table 2.
+3.2. Analytical model
+3.2.1. Principal component analysis (PCA)
+The next step involves constructing indexes using principal component
+analysis (PCA). Principal Component Analysis (PCA) is a widely
+used statistical technique applied in various fields (consumer behaviour
+analysis, climate data analysis, and image and signal processing),
+including indexing. PCA is a mathematical approach to identifying and
+summarizing patterns within a dataset by reducing its dimensionality.
+PCA offers a valuable tool for capturing essential information and
+generating composite indices that can simplify complex datasets.
+Normalising the indicators is the first step in forming the residential
+energy poverty index. Normalization is done to bring all the indicators to
+the same scale (0–1), where the household with the lowest value of the
+selected energy poverty indicator gets a value of 0, whereas a value of 1
+is assigned to the one with the highest value of the particular energy
+poverty indicator. Also, it helps to make all the indicators positively
+related to residential energy poverty.
+MAX(Xi)− Xij
+xij=
+MAX(Xi)− MIN(Xi); for a negative relationship (1)
+Xij− MIN(Xi)
+xij=
+MAX(Xi)− MIN(Xi); for a positive relationship (2)
+A 19x19 correlation matrix has been calculated, capturing the relationships
+between the variables. The following determinantal equation
+is solved to extract meaningful information from this matrix,
+yielding 19 characteristic roots, or eigenvalues, denoted as λ1 to λ19.
+|M− λI|=0 (3)
+These eigenvalues represent the underlying dimensions contributing
+to the dataset’s variance. Eigenvalues, which explain more than 80
+percent of the total variance, are considered for forming principal
+components. For this study, it comes down to seven eigenvalues
+6
+B. Tikadar and D. Swami Table 2
+Indicator list used in the study.
+Category Indicator Relationship with
+residential energy
+poverty
+Energy
+efficiency
+index
+Electricity
+access and
+reliability
+index
+Type of
+variable
+Variable significance References
+Clean and
+green energy
+index
+Percentage of LED lights per
+household
+Negative Continuous LED lights are more energy-efficient
+compared to traditional incandescent or
+fluorescent bulbs, resulting in lower energy
+consumption and cost savings for
+households. A higher percentage of LED
+lights installed signifies improved energy
+efficiency and reduced electricity expenses,
+which can help alleviate energy poverty.
+Percentage of star-rated fans
+per household
+Negative Continuous The star rating of ceiling fans indicates
+their energy efficiency, with a higher
+percentage of star-rating fans representing
+more efficient models that consume less
+electricity for the same level of
+performance. An average star rating of
+ceiling fans provides insights into the
+energy consumption patterns of households
+for cooling purposes. Higher-rated fans
+contribute to reducing the risk of energy
+poverty.
+Energy efficiency ratings of
+high energy appliances
+(refrigerator, and washing
+machine) per household
+Negative Continuous The star ratings of air conditioners,
+refrigerators, and washing machines
+indicate their energy efficiency levels.
+Appliances with higher star ratings
+consume less energy, leading to lower
+operating costs for households. Investing in
+energy-efficient appliances can help
+mitigate energy poverty by reducing
+energy expenses.
+Grid supply availability Negative Binary Lack of access to grid electricity directly
+indicates energy poverty, as households
+may resort to unreliable or expensive
+alternative sources for meeting their energy
+needs, impacting their quality of life and
+economic opportunities.
+Power reliability (monthly
+power cuts)
+Negative Categorical Power reliability is crucial for ensuring
+uninterrupted access to electricity for
+households. A high rate of power cuts
+signifies an unstable electricity supply,
+increasing the likelihood of disruptions in
+daily activities and improving overall well-
+being for households, thus reducing the risk
+of energy poverty.
+Number of days with low
+voltage
+Positive Continuous Low-voltage days indicate fluctuations or
+instability in the electricity supply, which
+can affect the performance of electrical
+appliances and increase the risk of damage.
+Frequent days with low voltage may lead to
+higher maintenance costs for households
+and compromise the quality of energy
+services, contributing to energy poverty.
+Number of hours of electricity
+available during 6 p.m.–12 a.
+m.
+Negative Continuous Access to electricity during peak hours in
+the evening is particularly important for
+households, as it enables activities such as
+cooking, studying, and socializing. The
+availability of useful electricity during
+these hours enhances household well-being
+and reduces reliance on alternative energy
+sources, thereby mitigating energy poverty.
+Years of grid connection Negative Continuous The number of years of grid connection
+reflects the historical development of
+energy infrastructure and services in a
+given area. Longer years of grid connection
+may indicate improved energy access and
+reliability over time, contributing to lower
+energy poverty levels as households benefit
+from more reliable energy services thus
+alleviating energy poverty.
+PNG/LPG used for cooking Negative Binary Access to clean cooking fuels like PNG or
+LPG improves indoor air quality, reduces
+health risks associated with indoor air
+pollution from traditional solid fuels, and
+enhances cooking efficiency. The absence
+Bonatz et al. (2019)
+Utilities Policy 93 (2025) 101878
+(Bonatz et al., 2019; Cedano et al., 2021;
+Che et al., 2021; Jayasinghe et al., 2021;
+Nussbaumer et al., 2012, 2013)
+(Nayan Yadava and Sinha, 2019; Practical
+Action, 2010; Ssennono et al., 2021)
+(Abbas et al., 2020; Adusah-Poku and
+Takeuchi, 2019; Bekele et al., 2015;
+Bonatz et al., 2019; Che et al., 2021;
+Culver, 2017; Gowon Edoumiekumo
+et al., 2013; Gupta et al., 2020;
+(continued on next page)
+7
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Table 2 (continued)
+Category Indicator Relationship with
+residential energy
+poverty
+Type of
+variable
+Variable significance References
+Energy
+appliance
+index
+of PNG/LPG access may indicate reliance
+on more polluting and inefficient cooking
+fuels, exacerbating energy poverty.
+Firewood/chips for cooking Positive Binary Reliance on firewood or chips for cooking is
+common in many low-income households,
+particularly in rural areas. While these fuels
+are often readily available and inexpensive,
+they contribute to indoor air pollution,
+respiratory diseases, and deforestation.
+Higher usage of firewood/chips for cooking
+indicates a higher prevalence of energy
+poverty due to the associated health risks,
+environmental degradation, and time spent
+on fuel collection.
+Dung cake for cooking Positive Binary Dung cakes are a traditional cooking fuel
+used in many rural households. While dung
+cakes are easily accessible and inexpensive,
+they produce significant indoor air
+pollution. Increased use of dung cakes for
+cooking signifies a higher degree of energy
+poverty due to the associated health
+hazards and environmental degradation.
+Agri residue/coal/kerosene
+for cooking
+Positive Binary The use of agricultural residues, coal, or
+kerosene for cooking indicates reliance on
+traditional and often polluting cooking
+fuels. These fuels are typically less efficient
+and produce higher levels of indoor air
+pollution compared to clean cooking fuels
+like LPG or electricity. Higher usage of
+these fuels suggests a higher prevalence of
+energy poverty due to health risks,
+environmental damage, and economic
+inefficiencies.
+Electricity based cooking Negative Binary Electricity-based cooking offers a cleaner
+and more efficient alternative to traditional
+cooking fuels, reducing indoor air pollution
+and health risks. Access to electricity for
+cooking can enhance household safety,
+improve cooking efficiency, and reduce
+reliance on polluting fuels. Higher adoption
+of electricity-based cooking indicates lower
+energy poverty levels due to improved
+access to clean and reliable cooking energy.
+Fuel stacking Positive Categorical Higher usage of LPG for daily cooking
+needs indicates improved access to clean
+energy sources and lower energy poverty
+levels. Conversely, not utilizing LPG for
+cooking, despite its availability,
+demonstrates fuel stacking and therefore
+signifies heightened energy poverty
+resulting from reliance on more polluting
+and inefficient fuels.
+Use of invertor-battery Negative Binary The presence of an inverter-battery system
+in a household suggests a proactive
+approach to managing electricity needs.
+Using backup power signifies a lower
+degree of energy poverty as the household
+benefits from more reliable energy services.
+Fans per square meter of
+household area
+Negative Continuous The number of fans in a household is
+indicative of its cooling requirements,
+especially in regions with hot climates.
+Fans consume relatively low amounts of
+energy compared to other cooling
+appliances like air conditioners, making
+them essential for maintaining comfort and
+reducing reliance on more energy-intensive
+cooling solutions. A higher number of fans
+may suggest a lower level of energy poverty
+by providing affordable cooling options to
+households.
+Lights per square meter of
+household area
+Negative Continuous Lighting is essential for household
+activities, safety, and productivity. The
+number of lights in a household reflects its
+Jayasinghe et al., 2021; Nussbaumer
+et al., 2012, 2013; Sadath and Acharya,
+2017; Santill´
+an et al., 2020; Wang et al.,
+2015)
+(Abbas et al., 2020; Adusah-Poku and
+Takeuchi, 2019; Crentsil et al., 2019;
+Culver, 2017; Gowon Edoumiekumo
+et al., 2013; Gupta et al., 2020; Mendoza
+et al., 2019; Nayan Yadava and Sinha,
+2019; Nussbaumer et al., 2012, 2013;
+Ssennono et al., 2021; Szirmai, 2010;
+Wang et al., 2015)
+(Nayan Yadava and Sinha, 2019; Practical
+Action, 2010)
+(Gupta et al., 2020; Jayasinghe et al.,
+2021; Ssennono et al., 2021; Wang et al.,
+2015; Zhao et al., 2021)
+(Adusah-Poku and Takeuchi, 2019;
+Bekele et al., 2015; Crentsil et al., 2019;
+Gupta et al., 2020; Ssennono et al., 2021)
+(continued on next page)
+8
+B. Tikadar and D. Swami Table 2 (continued)
+Category Indicator Relationship with
+residential energy
+poverty
+Utilities Policy 93 (2025) 101878
+Type of
+variable
+Variable significance References
+Number of high energy
+appliances (Refrigerator,
+Washing Machine) per
+household
+Communication appliances
+(TVs, Desktops/Laptops,
+Mobile Phones) per member of
+a household
+lighting needs and energy consumption for
+illumination. Higher numbers of lights may
+indicate better access to electricity and
+improved living standards, contributing to
+lower energy poverty levels.
+Negative Continuous Appliances such as refrigerators and
+washing machines improve living
+standards and quality of life by providing
+convenience, hygiene, and food
+preservation. They also consume
+substantial amounts of energy. The number
+of these appliances in a household indicates
+its energy consumption patterns and ability
+to afford energy-intensive appliances.
+Negative Continuous Communication appliances play a crucial
+role in connecting households to
+information, entertainment, and
+opportunities. It elevates social
+connectivity and elevates financial
+inclusion and economic activity.
+(Abbas et al., 2020; Adusah-Poku and
+Takeuchi, 2019; Bekele et al., 2015;
+Crentsil et al., 2019; Gupta et al., 2020;
+Jayasinghe et al., 2021; Mendoza et al.,
+2019; Nussbaumer et al., 2012; Santill´
+an
+et al., 2020; Wang et al., 2015; Zhao et al.,
+2021)
+(Abbas et al., 2020; Adusah-Poku and
+Takeuchi, 2019; Crentsil et al., 2019;
+Jayasinghe et al., 2021; Mendoza et al.,
+2019; Nussbaumer et al., 2012; Santill´
+an
+et al., 2020)
+(mentioned in Table S1 in the supplementary index).
+The corresponding eigenvector is determined by solving equation (4)
+for each selected eigenvalue. This eigenvector represents the direction in
+the original feature space and is the most representative of the variance
+captured by the respective eigenvalue (mentioned in Table S2 in the
+supplementary index).
+(M− λkI)Fʹ
+k =0 (4)
+Fk =[f1kf2kf3kf4kf5kf6kf7k] (5)
+With the eigenvectors Fk, the process of computing principal components
+starts. The principal components Pij serve as new, uncorrelated
+variables that are linear combinations of the original features. They are
+derived through the following formulas, where xj represents the original
+data matrix and Fk is the matrix containing the eigenvectors:
+P1j=xjF1
+P7j=xjF7 (6)
+xj=[x1jx2jx3jx4j………x16jx17jx18jx19j] (7)
+The Residential Energy Poverty Index (REPI) for each household j is
+calculated as the weighted sum of the principal components. The
+weights assigned to each principal component are determined by the
+variance associated with each component. This weighting scheme ensures
+that the most influential components contribute more significantly
+to the index calculation (Gupta, 2008).
+λ1P1j +λ2P2j +λ3P3j +λ4P4j +λ5P5j +λ6P6j +λ7P7j
+REPIj=
+λ1 +λ2 +λ3 +λ4 +λ5 +λ6 +λ7
+(8)
+Given that the Residential Energy Poverty Index (REPI) does not
+offer a breakdown of indexing for the distinct categories of energy
+poverty, it is important to analyse each dimension separately to gain a
+clearer understanding. PCA is performed separately for each dimension
+(clean and green energy, electricity access and reliability, energy appliances
+and energy efficiency). We can generate separate principal
+components that encapsulate the significant variance attributed to each
+category by conducting PCA separately for each dimension. This method
+enables us to assess and compare households in terms of overall energy
+poverty and the specific energy challenges they face within each
+dimension. Further, linear normalization is performed to provide an
+index between 0 and 1 using the formula.
+REPIij− MIN(REPIi)
+Normalised REPIij=
+MAX(REPIi)− MIN(REPIi) (9)
+After computing each household’s dimension-specific principal
+components and indices, we aggregate the data to derive the average
+values for households within particular states. Further, the values are
+divided into four categories: "most," "more," "less," and "least" using the
+quantile approach (Q4). The quantile method (Q4) is a statistical technique
+that divides a dataset into four categories (Dodge, 2008). Here, the
+quantile method is used for categorization, ensuring balanced representation
+across these categories and better data visualization.
+3.2.2. Multiple linear regression
+After creating the REPI, multiple linear regression (MLR) depicts the
+relationship between the residential energy poverty index and various
+socioeconomic variables (Darlington and Hayes, 2016). This method
+explains the relationship between the dependent variable (REPI) and
+explanatory variables (area of residence, gender, education level, type of
+house, caste, income source and monthly expenditure) using a linear
+combination of the explanatory variables. Explanatory variables,
+including area of residence, gender, education level, type of house,
+caste, income source, and monthly expenditure, are derived from
+existing literature, emphasizing their relevance in understanding energy
+poverty dynamics. Abbas et al. (2020) and Sharma et al. (2019) highlight
+the importance of socio-demographic factors like area of residence
+and housing type in determining energy vulnerability. Gender and education
+level have been linked to differential access to resources and
+energy use patterns. Income source and monthly expenditure are critical
+economic indicators directly affecting energy affordability and consumption
+(Sharma et al., 2019). Caste, a socio-cultural factor particularly
+relevant in the Indian context, has been shown to influence energy
+access and inequality(Acharya and Sadath, 2019).
+The following equation depicts the MLR model for the study.
+REPIi =β0 +β1AREA OF RESIDENCE +β2GENDER
++β3EDUCATION LEVEL +β4TYPE OF HOUSE
++β5MONTHLY EXPENDITURE +β6CASTE+β7INCOME SOURCE +ε
+(10)
+were,
+β0 is the intercept of the relationship;
+β1,β2,β3,β4,β5 ,β6,β7 regression coefficient is the factor that dictates
+how much importance the equation assigns to the explanatory variable
+9
+B. Tikadar and D. Swami to generate an estimated output and
+ε is the error related to the observation.
+Area of residence, gender, education level, type of house, income
+source, and caste are categorical data; hence, dummy variables must be
+created. Monthly expenditure is a continuous variable. The area of
+residence is divided into two categories: rural and urban. Similarly,
+education level is divided into four categories: no formal education,
+primary education, secondary education, and higher education. Similarly,
+income source is divided into three categories: primary economic
+activities, employment economic activities, and other sources of income.
+Primary economic activities include agriculture and agriculture labour
+and cattle rearing; employment economic activities include government
+and private jobs, non-agricultural labour, business and freelancing jobs;
+other sources of income consist of pension, remittances and rental income.
+MLR helps to identify the relationship between dependent and
+independent variables. This method provides insights into how explanatory
+variables influence the REPI.
+A detailed methodological approach is shown in Fig. 2.
+4. Results and discussion
+Including 19 unique indicators, each focusing on various dimensions
+provides diverse viewpoints on energy poverty for each state of the Indian
+subcontinent. The findings from this research yield an understanding
+of the energy poverty situations within the country,
+considering multiple dimensions and rural-urban differentiation. Here,
+states are grouped into four distinct classes: "least," "less," "more," and
+"most," representing the position of states based on their relative
+Utilities Policy 93 (2025) 101878
+standing along the energy performance scale. States coloured in red
+indicate the highest level of residential energy poverty, placing them
+within the "most" category. Conversely, those shaded in dark green
+signify the least affected regions. Light green and yellow hues correspond
+to the "less" and "least" categories. States devoid of colour lack
+available data: Ladakh, Jammu & Kashmir (union territory), Goa, Arunachal
+Pradesh, Nagaland, Manipur, Mizoram, Tripura, Meghalaya,
+Sikkim, Lakshadweep (union territory) and Andaman & Nicobar (union
+territory).
+The initial findings, depicted in Figs. 3 and 4, present the Residential
+Energy Poverty Index (REPI) for 21 states and union territories. Lower
+values signify lower residential energy poverty.
+The comprehensive mean REPI score for the entire country is 0.577,
+marking a significantly higher value when compared to the minimum
+score observed for Delhi. This observation closely echoes previous
+research findings emphasizing India’s ongoing struggle with challenges
+related to energy poverty (Acharya and Sadath, 2019; Gupta et al., 2020;
+Sadath and Acharya, 2017). Chhattisgarh, Jharkhand, Madhya Pradesh,
+and Bihar emerge as regions with elevated levels of energy poverty.
+These states continue to grapple with significant developmental issues
+linked to delivering affordable and dependable energy services(Gupta
+et al., 2020).
+In contrast, the national capital, Delhi, Maharashtra and southern
+states such as Telangana, Andhra Pradesh and Karnataka, display lower
+levels of residential energy poverty, which is in line with previous
+studies (Acharya and Sadath, 2019; Gupta et al., 2020). These studies
+suggest that improved economic conditions, higher levels of education
+within communities, and reduced caste-based disparities have
+Fig. 2. Methodology for developing residential energy poverty index.
+10
+B. Tikadar and D. Swami Fig. 3. Statewise residential energy poverty index.
+contributed to alleviating energy poverty in Telangana, Andhra Pradesh
+and Karnataka (Acharya and Sadath, 2019). Delhi has the lowest normalised
+score, benefiting from high-quality energy services with uninterrupted
+electricity supply and access to clean energy in cooking and
+green electricity. Approximately 100% of the population in Delhi has
+grid connection, indicating better accessibility and reliability (Agrawal
+et al., 2021). States such as Gujarat, Kerala, and Uttarakhand modestly
+outperform the national average.
+4.1. Regional-level REPI for the Indian subcontinent
+Analysing the energy poverty from a regional standpoint, the division
+into northern, eastern, western, and southern regions yields valuable
+insights. The regional division of the states is done according to the
+zonal division of Indian territory by the Ministry of Home Affairs (MHA,
+GOI). The southern region includes Telangana, Tamil Nadu, Kerala,
+Karnataka, and Andhra Pradesh. Notably, the southern region reports
+the lowest levels of residential energy poverty, with a score of 0.396,
+below the national average of 0.577. IT sector hubs, like Tamil Nadu,
+Telangana, and Karnataka, exhibit relatively lower levels of residential
+energy poverty, as highlighted in Fig. 5. This observation highlights the
+strong correlation between a state’s socioeconomic status and the degree
+of energy deprivation. It serves as a reminder that the socioeconomic
+conditions prevailing within a state significantly shape its energy access
+and deprivation dynamics.
+The northern region comprises some average energy-performing
+states compared with the national average, like Punjab, Himachal Pradesh,
+and Haryana, with scores of 0.462,0.458 and 0.461. Northern
+India also comprises states/UTs with better energy performance, such as
+Delhi, along with lesser-performing states, like Rajasthan, with a score of
+0.719. The higher score of Delhi compared to other northern states is
+attributed to its small size, larger population with high income, more
+awareness about energy efficiency, and better grid connectivity (Gupta
+et al., 2020).
+Eastern region comprises West Bengal, Odisha, Jharkhand, Bihar,
+and Assam. The eastern region stands out as having the second highest
+prevalence of energy poverty, scoring 0.790, with high-energy poor
+states like Bihar and Jharkhand. The central region has the highest
+prevalence of energy poverty at 0.805, and it comprises Uttarakhand,
+Uttar Pradesh, Madhya Pradesh, Chhattisgarh, Gujarat, and
+Maharashtra.
+Findings highlight the intra-regional variations in energy poverty
+across northern, southern, eastern and western India. Investment in
+expanding and upgrading energy infrastructure, particularly in Chhattisgarh,
+Jharkhand and Bihar, can alleviate energy poverty. This strategy
+Utilities Policy 93 (2025) 101878
+could include extending electricity grids with renewable integration,
+promoting decentralized renewable energy solutions like solar power,
+and improving access to clean cooking fuels. Policymakers can use this
+information to optimally allocate resources per each region’s needs,
+which will enormously help reduce energy poverty to a certain extent.
+The above analysis highlights diversity in energy performance across
+states and regions. We dig more comprehensively into this topic by
+examining the individual contributions of different dimensions, such as
+energy efficiency, electricity access and reliability, clean and green energy
+and energy appliances, to the overall Residential Energy Poverty
+Index (REPI).
+4.2. Dimensions of energy poverty
+4.2.1. Clean and green energy
+Clean energy sources play an important role in the broader context of
+residential energy poverty. They align closely with the Sustainable
+Development Goals, particularly SDGs 3 and 7 (United Nations, 2023).
+Using non-clean energy sources has detrimental effects on the environment
+and individual health. Fig. 6 illustrates the overall clean and green
+energy situations across Indian states. Delhi, Telangana, and Maharashtra
+scored highest in the clean energy index, whereas states like
+Chhattisgarh, Jharkhand and Madhya Pradesh scored least in the clean
+and green energy index. As per the Ministry of Petroleum and Natural
+Gas, Delhi, Telangana and Maharashtra constitute 477.3 lakhs of active
+domestic customers of LPG, whereas Chhattisgarh, Jharkhand and
+Madhya Pradesh constitute only 288.4 lakhs of active domestic LPG
+customers (MoP&NG, 2023). The government initiated the Ujjwala
+scheme to promote the use of clean energy for cooking, facilitating the
+addition of approximately 17 crore LPG consumers over the past nine
+years.
+Furthermore, to discourage kerosene use for cooking, the government
+eliminated the kerosene subsidy in 2021(Rao, 2012). In states with
+lower electricity accessibility and reliability, there is a greater reliance
+on non-clean energy sources for heating, lighting, and cooking. This
+correlation is highlighted by examining the relationship between
+accessibility, reliability and clean energy. Expanding the reach of the
+Unnat Chulha Abhiyan (UCA), launched in 2014 to promote improved
+biomass cookstoves, is important for facilitating the transition from
+traditional fuels to cleaner alternatives for cooking. The National Efficient
+Cooking Program (NECP), introduced in 2023, offers
+induction-based cookstoves with a 25–30% cost advantage over traditional
+cooking methods, promising significant energy savings and
+cost-effective cooking solutions for rural India (PIB, 2023c).
+4.2.2. Electricity access and reliability
+Fig. 7 presents a detailed overview of overall electricity access and
+reliability. The dimension encompasses factors such as grid supply
+provision, occurrences of low voltage, instances of power cuts within the
+existing power connection, years of grid connection and hours of electricity
+available in the evening. This dimension is pivotal in mitigating
+energy poverty while fostering sustainable and inclusive growth. Certain
+southern states, notably Tamil Nadu and Kerala, Gujarat, and Maharashtra
+exhibit better energy quality performance than other Indian states.
+Contrastingly, Uttar Pradesh, Assam, Bihar, Jharkhand, and Chhattisgarh
+exhibit the least electricity access and reliability levels among all
+the states under study. This result is consistent for both rural and urban
+areas. This results in their heavy reliance on traditional agro-based fuels
+for their cooking, lighting, and heating needs. Inadequate electricity
+access and reliability affect households’ use of non-clean energy sources,
+impacting human health and environmental well-being. The government’s
+efforts under the SAUBHAGYA (Pradhan Mantri Sahaj Bijli Har
+Ghar Yojana) scheme, which targets last-mile electrification and reports
+100 per cent electrification in recent years, should now focus on
+ensuring a stable and consistent electricity supply to every household.
+Strengthening programs like the Deen Dayal Upadhyaya Gram Jyoti
+11
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Yojana (DDUGJY) will ensure a stable and reliable electricity supply.
+Fig. 8 shows the state-wise percentage of households with less than 8 h
+of electricity. This proactive approach is essential to prevent intermittent
+energy supply from hindering individuals’ productivity in various
+spheres.
+Fig. 4. Residential energy poverty.
+4.2.3. Energy appliances
+Energy appliances transform available energy into user-specific applications.
+Their utilization extends beyond mere convenience, significantly
+enhancing household productivity, facilitating access to
+education, boosting economic activities, and saving time. Fig. 9 provide
+insights into energy appliance penetration across Indian states. The
+12
+B. Tikadar and D. Swami Fig. 5. Regional residential energy poverty index.
+extent of appliance penetration is intertwined with individuals’
+spending capacities and access to quality energy sources. Delhi and
+Kerala demonstrate higher energy appliance penetration, reflecting the
+influence of increased income levels and pursuing a more luxurious
+lifestyle, while Madhya Pradesh and Bihar have the least energy appliance
+penetration. Basic appliances such as fans, lights, and mobile
+phones have become universal in most urban households. However, the
+energy appliance differs primarily due to high-energy-consuming devices
+like televisions, computers and refrigerators, particularly in urban
+areas (Gupta et al., 2020). The growth of an aspirational middle class
+and the desire for better living standards have increased demand for
+these appliances, including fans, lights, and televisions. Additionally,
+the effects of climate change, such as extreme temperatures and unpredictable
+monsoon patterns, have further driven the demand for these
+household devices. This distinction highlights the varying dimensions of
+energy appliances between urban and rural settings.
+4.2.4. Energy efficiency
+Fig. 10 provides an illustrative view of the overall energy efficiency
+dimension within residential energy poverty. States such as Delhi,
+Odisha, Himachal Pradesh, and West Bengal have higher energy efficiency
+index scores than other states under study. On the other hand,
+states like Chhattisgarh, Jharkhand, Madhya Pradesh, and Tamil Nadu
+continue to face significant energy inefficiencies, worsening the challenges
+of reducing energy poverty for their residents. Energy inefficiency
+significantly increases household vulnerability to energy poverty, primarily
+due to substantial energy losses at the household level. Inefficient
+appliances contribute to excessive energy consumption, driving utility
+costs and placing additional financial strain on economically disadvantaged
+households. These inefficiencies hinder access to affordable and
+reliable energy and perpetuate a cycle of poverty, as limited resources
+are diverted towards high energy bills instead of essential needs such as
+food, education, and healthcare. The Bureau of Energy Efficiency’s
+(BEE) star labelling program to promote energy-efficient appliances is a
+major step. The Energy Efficient Fans Programme (EEFP), launched in
+2023 and promised to deliver one crore energy-efficient fans in the
+initial phase, will help increase the energy-efficient appliance penetration
+in Indian households (PIB, 2023c). The effectiveness of energy efficiency
+measures is closely tied to the quality of the energy supply. In
+regions where the supply is unreliable or of low quality, the benefits of
+energy-efficient practices and technologies may not be fully realized. As
+discussed in the electricity supply and reliability section, this barrier
+needs to be addressed by working on infrastructure improvements.
+Addressing these inefficiencies through targeted interventions and
+capacity-building initiatives is essential to alleviating energy poverty
+and promoting inclusive economic development nationwide.
+Utilities Policy 93 (2025) 101878
+4.3. REPI for urban and rural India
+States with high energy poverty in rural areas might not necessarily
+exhibit similar dynamics within urban contexts. This divergence can be
+attributed to the uneven distribution of wealth and distinct trajectories
+of urbanization experienced by states. The contrasting patterns
+emphasize the importance of adapting energy poverty alleviation policies
+to account for the unique challenges of urban and rural environments.
+In India, there is a wide variation in energy consumption patterns
+across rural and urban regions. In rural regions, the use of firewood,
+traditional cookstoves and biomass burning dominate the energy
+choices of households, while the use of LPG, electric induction, AC, and
+refrigerators showcase the energy consumption pattern of urban
+households (Acharya and Sadath, 2019; Sadath and Acharya, 2017). It
+thus becomes essential to understand how energy poverty varies across
+rural and urban households in India and what specific interventions can
+be used to reduce energy poverty.
+Fig. 11a shows a clear differentiation in residential energy poverty
+between rural and urban settings within each state. The consistent trend
+of higher energy poverty in rural areas holds across all states. On
+average, India’s rural energy poverty index (REPI) stands at 0.622, while
+urban REPI is notably lower at 0.386. This significant disparity is
+evident throughout all Indian states. The disparity between urban and
+rural regions is attributed to multiple factors, including the poor quality
+of energy services, power disruption and lack of awareness about
+energy-efficient appliances. Our study vividly depicts the substantial
+contrast between rural and urban India, which aligns with the conclusions
+of previous studies (Acharya and Sadath, 2019; Gupta et al., 2020;
+Sadath and Acharya, 2017). Chhattisgarh scored high energy poverty in
+urban areas, whereas Madhya Pradesh scored high in rural areas. This
+finding can be attributed to the persistence of traditional fuel usage in
+rural regions despite LPG connections. LPG usage is limited by infrastructure
+challenges, which include issues related to transportation,
+road connectivity, and the availability of LPG distribution centres, as
+well as limited financial resources for LPG refills and a lack of awareness
+regarding the benefits of LPG.
+Urban-Rural differences in REPI components:
+•Clean and green energy: Urban households have better access to
+clean energy sources like LPG and electricity. In contrast, rural
+households continue to rely heavily on biomass, with clean energy
+access being limited by logistical and economic barriers. States like
+Bihar and West Bengal highlight this disparity (Fig. 11b), with the
+highest difference between urban and rural scores on clean and green
+energy access.
+•Electricity access and reliability: While electrification rates have
+improved nationally, rural areas struggle with unreliable power
+supply and frequent disruptions. Fig. 11c scores show that urban
+areas generally score higher in access and reliability. States like
+Assam and Bihar have the lowest scores in rural electricity access and
+reliability, while states like Himachal Pradesh and Kerala score
+higher in rural electricity access and reliability.
+•Energy appliance: Urban areas display significantly higher penetration
+of energy-efficient and modern appliances than rural areas
+(Fig. 11d). States like Delhi, Assam and Punjab lead in urban appliance
+ownership, reflecting their advanced infrastructure and higher
+income levels. In contrast, rural areas in states such as Bihar, Madhya
+Pradesh, and Jharkhand lag far behind, reflecting limited affordability
+and a lack of awareness of modern energy technologies.
+•Energy efficiency: Urban areas benefit from better awareness and
+access to energy-efficient appliances, reflected in higher scores in
+states like Delhi and Kerala (Fig. 11e). In rural areas, however, energy
+efficiency is rarely a priority, with affordability and immediate
+functionality taking precedence (Sankhyayan and Dasgupta, 2019).
+13
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Fig. 6. Clean and green energy. (For interpretation of the references to colour in this figure legend, the reader is referred to the Web version of this article.).
+4.4. Relationship between REPI and other dimensions using MLR
+Table 3 displays the multiple linear regression model, which depicts
+the relationships between the residential energy poverty index (REPI)
+and various independent variables. Table 3 shows that REPI positively
+correlates with rural settings and kaccha houses. In contrast, there is an
+inverse relationship between monthly expenditure and REPI, implying
+that higher monthly expenditures are associated with lower levels of
+energy poverty. Education is strongly associated with whether a
+household experiences energy poverty. Specifically, households led by
+individuals without formal education are more likely to face energy
+poverty than those with some education level. Energy literacy, defined
+14
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Fig. 7. Electricity access and reliability.
+as an individual’s knowledge, attitudes, and behaviours regarding energy
+use and sustainability, is linked to shaping energy consumption
+patterns and addressing energy poverty(Brounen et al., 2013; Martins
+et al., 2020; van den Broek, 2019).
+Moreover, the gender of the household also exhibits a notable correlation
+with energy poverty. Remarkably, households with female
+heads negatively correlate with energy poverty, indicating that such
+households are less likely to experience energy poverty. Marginal
+communities, including SC/ST and OBC populations, face higher levels
+of residential energy poverty, as depicted by the positive correlation of
+different marginal groups with REPI. Also, households relying on primary
+income sources such as agriculture, agricultural labour, and cattle
+15
+B. Tikadar and D. Swami Fig. 8. Statewise percentage of household with less than eight hours of
+electricity.
+rearing are significantly associated with higher levels of energy poverty.
+Despite being crucial contributors to the economy, these households
+often struggle with access to reliable energy services, perpetuating a
+cycle of poverty and energy insecurity among vulnerable communities.
+This regression analysis sheds light on the complex interplay of factors
+influencing energy poverty. Rural-urban disparities, housing conditions,
+education levels, economic activities, and gender dynamics are strongly
+associated with energy poverty.
+Fig. 12 shows scatterplots relating REPI scores with state GDP per
+capita. The scatterplot shows a negative correlation between REPI scores
+and state GDP per capita. States with higher GDP per capita, such as
+Delhi, Karnataka, and Tamil Nadu, tend to have lower REPI scores,
+indicating reduced energy poverty. On the other hand, economically
+weaker states such as Bihar, Uttar Pradesh, and Jharkhand exhibit
+higher REPI scores. Delhi’s low REPI score is due to its small size, better
+grid connectivity, high-income population, and energy efficiency
+awareness (Gupta et al., 2020). Economically weaker states like Bihar,
+Uttar Pradesh, and Jharkhand exhibit higher REPI scores due to limited
+energy access and weak infrastructure. This trend underscores the
+importance of economic development in addressing energy poverty, as
+higher income levels generally translate to better access to energy resources,
+infrastructure, and appliances.
+5. Policy recommendations
+Based on the study’s findings, a three-tier government-level
+approach is proposed, involving the central government, state government,
+and local government.
+National level: The analysis identified Chhattisgarh, Bihar, Madhya
+Pradesh, and Jharkhand as having the highest levels of residential energy
+poverty. These states also perform poorly in individual dimensions
+of clean and green energy, electricity access, and reliability. Therefore,
+implementing a National Clean Energy Policy (NCEP) that aligns with
+the National Action Plan on Climate Change (NAPCC) is recommended.
+This policy should focus on regional variations and allocate a higher
+budget for energy poverty alleviation programs exclusively targeting
+these states.
+State level: The results show that states like Chhattisgarh, Bihar, and
+Jharkhand, which struggle with residential energy poverty, should focus
+on rural electrification and promoting clean cooking fuel, integrating
+schemes like SAUBHAGYA and DDUGJY. Additionally, states such as
+Assam and Uttar Pradesh, which perform poorly in electricity access and
+reliability index, can adopt a decentralized solar home system to
+improve electricity availability. Therefore, developing and implementing
+state-specific Energy Poverty Action Plans (EPAP) is crucial at the
+state level. Offering subsidies for clean energy adoption can also help
+alleviate energy poverty. States with lower clean and green energy
+indices can learn from successful models implemented in Delhi, Telangana,
+and Karnataka’s Renewable Energy Policy 2022–2027
+Utilities Policy 93 (2025) 101878
+(Government of Karnataka, 2022), which provides subsidies and incentives
+to households and small industries for setting up solar projects.
+Local level (Village, block, community level): The findings show high
+residential energy poverty in rural areas across all the states. So, at the
+local level, the focus should be on community-based renewable energy
+projects, in which local government and leaders should be involved to
+ensure that solutions are specific to community needs. It will foster
+participatory decision-making, which can, in turn, enhance the sustainability
+of the energy projects. Implementing decentralized solar
+power in energy-poor areas can improve energy access and reliability.
+Programs like PM-KUSUM can promote solar power among farmers, and
+combining these with subsidized installations can boost energy
+affordability.
+Focus on energy efficiency: According to the findings, Madhya Pradesh,
+Jharkhand and Chhattisgarh are performing poorly in the energy
+appliance and efficiency indexes. State governments thus have significant
+opportunities to implement demand-side management policies.
+Encouraging the use of energy-efficient appliances and technologies can
+reduce the financial burden on residents, stimulate market transformation,
+and foster innovation. Energy efficiency initiatives, such as
+the Energy Efficient Fans Programme (EEFP) and National Efficient
+Cooking Programme (NECP) launched in 2023, can help households
+reduce overall energy consumption and lower energy bills.
+Focus on energy cleanliness, quality and reliability: Clean energy initiatives
+should promote clean cooking fuels in the rural areas of Jharkhand,
+Bihar, Madhya Pradesh, and Odisha, which have the lowest
+residential energy poverty scores. This shift from traditional fuels to
+clean energy in cooking and lighting will help improve their health to a
+significant extent. Expanding the reach of the Unnat Chulha Abhiyan
+(UCA), launched in 2014 and increasing LPG refill subsidy under
+Pradhan Mantri Ujjwala Yojana (PMUY) will ensure reliable energy
+supply in both urban and rural areas. Respective state governments
+should rationalize energy subsidies to target clean energy resources
+more efficiently, redirecting them from traditional fossil fuels to greener
+sources like off-grid renewable energy.
+Awareness campaigns through energy literacy: Energy literacy is
+particularly relevant in our analysis, as gender and literacy levels show a
+significant positive association with energy poverty. Promoting energy
+literacy, including financial energy literacy, action energy literacy, and
+device energy literacy, as suggested by van den Broek (2019), through
+educational campaigns on energy tariffs, demand response programs,
+and renewable energy is critical in urban and rural settings. These
+campaigns can enable residents to make informed choices about their
+energy use, potentially reducing energy bills and lowering their environmental
+footprint.
+Focus on gender-inclusive policies: As per the findings, households with
+female heads negatively correlate with energy poverty, making women a
+key stakeholder in reducing residential energy poverty. Women supported
+through self-help groups (SHGs) can be pivotal in promoting
+clean energy practices in rural areas, especially in cooking practices. The
+central government’s distribution of solar cookers can significantly
+enhance the delivery of affordable, clean and green energy for cooking
+to many villages. Similar targeted subsidy programs for marginal groups
+can also encourage a comprehensive and inclusive approach to energy
+poverty alleviation.
+Each region has unique challenges and needs, and a differentiated
+and targeted strategy is indeed the need of the hour. Recognizing the
+impact of multiple factors on energy poverty allows policymakers to
+develop strategies that can address energy poverty comprehensively,
+resulting in more effective and sustainable solutions.
+6. Conclusion
+The study demonstrates that residential energy poverty is not
+confined to a single dimension but presents itself as a complex and
+multidimensional challenge. The findings of the study state that
+16
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Fig. 9. Energy appliances.
+residential energy poverty exhibits significant variation, not only in
+rural-urban disparities but also among different states, and it is expected
+to escalate further in the coming years. The complex nature of residential
+energy poverty often remains overshadowed by the prevailing
+definition, majorly focusing on energy accessibility, which has been the
+driving force behind many of India’s energy poverty programs, yielding
+only partial success. Given the substantial investments made in central
+programs to address residential energy poverty, there is an urgent need
+for targeted interventions to address the unique challenges different
+states face in different dimensions of energy poverty.
+Hence, developing a comprehensive residential energy poverty index
+encompassing energy efficiency, clean and green energy, and energy
+17
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Fig. 10. Energy efficiency.
+appliances appears to be the most promising and sustainable approach
+to address this pressing issue effectively, which can provide a holistic
+solution to the problem at hand. The analysis identified Chhattisgarh,
+Bihar, Madhya Pradesh, and Jharkhand as having the highest residential
+energy poverty, while Delhi, Maharashtra and southern states such as
+Telangana, Andhra Pradesh and Karnataka, display lower levels of residential
+energy poverty. The analysis highlights that rural areas face
+distinct challenges, including limited access to clean energy, lower
+adoption of energy-efficient appliances, and frequent power disruptions.
+These challenges necessitate tailored interventions, such as improving
+18
+B. Tikadar and D. Swami Utilities Policy 93 (2025) 101878
+Fig. 11. Statewise rural-urban residential energy poverty index.
+infrastructure, strengthening subsidy delivery mechanisms, and promoting
+awareness campaigns about modern energy alternatives.
+Concerning energy policy, relying on a "one policy fits all" approach
+is no longer sufficient in this context. Instead, each state’s unique needs
+and circumstances should be addressed separately. Because states have
+different social and geographic aspects, it is important to formulate
+regional policies instead of a central approach. By adopting a
+decentralized approach, policymakers can better align energy policies
+with the specific challenges and opportunities in different states. This
+approach ensures that the energy needs of each region are met effectively,
+maximizing the impact of energy initiatives and promoting more
+equitable energy access throughout the country.
+Future studies in this direction should focus on addressing the
+following limitations. The choice of indicators is based on secondary
+19
+B. Tikadar and D. Swami Table 3
+Result of linear regression analysis.
+Estimate Std.
+Error
+t value Pr(>|
+t|)
+INTERCEPT− 0.355*** 1.46E-
+02− 24.293 <0.001
+RURAL 0.294*** 5.56E-
+52.802 <0.001
+03
+FEMALE− 0.0215*** 5.15E-
+03− 4.175 <0.001
+NO FORMAL EDUCATION 0.154*** 8.41E-
+18.315 <0.001
+03
+PRIMARY EDUCATION 0.113*** 7.90E-
+14.335 <0.001
+03
+SECONDARY EDUCATION 0.039*** 7.53E-
+5.189 <0.001
+03
+KACCHA HOUSE 0.135*** 5.77E-
+23.448 <0.001
+03
+SC/ST 0.058*** 5.69E-
+10.184 <0.001
+03
+OBC 0.026*** 5.61E-
+4.638 <0.001
+03
+PRIMARY INCOME SOURCE 0.068*** 1.27E-
+5.345 <0.001
+02
+EMPLOYMENT INCOME
+SOURCE− 0.040** 1.27E-
+3.29 <0.01
+02
+MONTHLY EXPENDITURE− 5.31E-
+4.30E-
+06***
+07− 12.259 <0.001
+*** Statistical significance at the Pr <0.001 level.
+** Statistical significance at the Pr <0.01 level.
+* Statistical significance at the Pr <0.05 level.
+Multiple R-squared: 0.3983, Adjusted R-squared: 0.3978.
+Fig. 12. Scatter plot of REPI scores against State GDP per capita.
+data sources, meaning the indicators used are constrained by data
+availability. Cross-sectional data limits the ability to assess trends or
+causality, so longitudinal data is recommended. Additionally, self-
+reported data in the survey may introduce biases, affecting analysis
+accuracy. The study also does not account for bioclimatic differences
+across India, where varying climatic conditions lead to different energy
+needs for thermal comfort. Furthermore, the index does not consider
+individual energy consumption behaviour or per capita expenditure on
+different fuels due to the unavailability of household-level data across
+Indian states. Finally, it does not account for the impact of existing state-
+or region-specific schemes in addressing energy poverty.
+Future research can address the limitations identified in this study
+and should strive to access more comprehensive and up-to-date data
+sources to refine and improve the accuracy of the index, acknowledging
+the contrast between the need for cooling in extreme climates and its
+Utilities Policy 93 (2025) 101878
+redundancy in milder weather. Second, it would be beneficial to incorporate
+district-level data and data from northeastern states, which might
+have unique energy challenges and contribute to a more comprehensive
+understanding of energy poverty in India.
+CRediT authorship contribution statement
+Biswajit Tikadar: Writing – original draft, Software, Methodology,
+Investigation, Formal analysis. Deepika Swami: Writing – review &
+editing, Supervision, Methodology, Conceptualization.
+Funding
+No funding was received for this particular work.
+Declaration of competing interest
+The authors declare that they have no known competing financial
+interests or personal relationships that could have appeared to influence
+the work reported in this paper.
+Acknowledgements
+We thank the Department of Sustainable Energy Engineering, IIT
+Kanpur, for providing the necessary support and resources to carry out
+this work.
+Appendix A. Supplementary data
+Supplementary data to this article can be found online at https://doi.
+org/10.1016/j.jup.2024.101878.
+Data availability
+Data will be made available on request.
+References
+Abbas, K., Li, S., Xu, D., Baz, K., Rakhmetova, A., 2020. Do socioeconomic factors
+determine household multidimensional energy poverty? Empirical evidence from
+South Asia. Energy Pol. 146. https://doi.org/10.1016/j.enpol.2020.111754.
+Acharya, R.H., Sadath, A.C., 2019. Energy poverty and economic development:
+household-level evidence from India. Energy Build. 183, 785–791. https://doi.org/
+10.1016/j.enbuild.2018.11.047.
+Adom, P.K., Amuakwa-Mensah, F., Agradi, M.P., Nsabimana, A., 2021. Energy poverty,
+development outcomes, and transition to green energy. Renew. Energy 178,
+1337–1352. https://doi.org/10.1016/j.renene.2021.06.120.
+Adusah-Poku, F., Takeuchi, K., 2019. Energy poverty in Ghana: Any progress so far?
+Renew. Sustain. Energy Rev. 112, 853–864. https://doi.org/10.1016/j.
+rser.2019.06.038.
+Agrawal, S., Mani, S., Jain, A., Ganesan, K., Urpelainen, J., 2021. India Residential
+Energy Survey (IRES) 2020. https://doi.org/10.7910/DVN/U8NYUP.
+Aklin, M., Cheng, C., Urpelainen, J., Ganesan, K., Jain, A., 2016. Factors affecting
+household satisfaction with electricity supply in rural India. Nat. Energy 1, 1–6.
+Angelou, N., Bhatia, M., 2015. Beyond Connections: Energy Access Redefined.
+Barnes, D.F., Khandker, S.R., Samad, H.A., 2011. Energy poverty in rural Bangladesh.
+Energy Pol. 39, 894–904. https://doi.org/10.1016/j.enpol.2010.11.014.
+Barnes, D.F., Sen, Mi, 2004. The Impact of Energy on Women’s Lives in Rural India.
+Bekele, G., Negatu, W., Eshete, G., 2015. Energy poverty in Addis Ababa city, Ethiopia.
+J. Econ. Sustain. Dev. 6 (3).
+Bonatz, N., Guo, R., Wu, W., Liu, L., 2019. A comparative study of the interlinkages
+between energy poverty and low carbon development in China and Germany by
+developing an energy poverty index. Energy Build. 183, 817–831. https://doi.org/
+10.1016/j.enbuild.2018.09.042.
+Brew-Hammond, A., 2010. Energy access in africa: challenges ahead. Energy Pol. 38,
+2291–2301. https://doi.org/10.1016/j.enpol.2009.12.016.
+Brounen, D., Kok, N., Quigley, J.M., 2013. Energy literacy, awareness, and conservation
+behavior of residential households. Energy Econ. 38, 42–50. https://doi.org/
+10.1016/j.eneco.2013.02.008.
+Cedano, K.G., Robles-Bonilla, T., Santill´
+an, O.S., Martínez, M., 2021. Assessing energy
+poverty in urban regions of Mexico: the role of thermal comfort and bioclimatic
+context. Sustainability. https://doi.org/10.3390/su131910646.
+Chandramouli, C., 2011. Census of India 2011. Provisional Population Totals.
+Government of India, New Delhi.
+20
+B. Tikadar and D. Swami Crentsil, A.O., Asuman, D., Fenny, A.P., 2019. Assessing the determinants and drivers of
+multidimensional energy poverty in Ghana. Energy Pol. 133. https://doi.org/
+10.1016/j.enpol.2019.110884.
+Culver, L.C., 2017. Energy Poverty: what You Measure Matters.
+Darlington, R.B., Hayes, A.F., 2016. Regression Analysis and Linear Models: Concepts,
+Applications, and Implementation. Guilford Publications.
+Dodge, Y., 2008. The Concise Encyclopedia of Statistics. Springer Science & Business
+Media.
+Goldemberg, J., 1990. One kilowatt per capita. Bull. At. Sci. 46, 13.
+Government of Karnataka, 2022. Karnataka renewable energy policy. URL. https://kredl.
+karnataka.gov.in/storage/pdf-files/Policy/KarnatakaRenewableEnergyPolic
+y2022-27NotificationCopy.pdf, 5.1.24.
+Gowon Edoumiekumo, S., Tombofa, S.S., Karimo, T.M., 2013. Multidimensional energy
+poverty in the SouthSouth-South geopolitical Zone of Nigeria. J. Econ. Sustain. Dev.
+www.iiste.org ISSN. Online.
+Gupta, E., 2008. Oil vulnerability index of oil-importing countries. Energy Pol. 36,
+1195–1211. https://doi.org/10.1016/j.enpol.2007.11.011.
+Gupta, S., Gupta, E., Sarangi, G.K., 2020. Household energy poverty index for India: an
+analysis of inter-state differences. Energy Pol. 144. https://doi.org/10.1016/j.
+enpol.2020.111592.
+IEA, 2021. Energy in India today – India energy outlook 2021 – analysis - IEA. URL. htt
+ps://www.iea.org/reports/india-energy-outlook-2021/energy-in-india-today,
+8.25.23.
+Jayasinghe, M., Selvanathan, E.A., Selvanathan, S., 2021. Energy poverty in Sri Lanka.
+Energy Econ. 101. https://doi.org/10.1016/j.eneco.2021.105450.
+Karpinska, L., ´
+Smiech, S., 2021. Breaking the cycle of energy poverty. Will Poland make
+it? Energy Econ. 94, 105063. https://doi.org/10.1016/j.eneco.2020.105063.
+Khandker, S.R., Barnes, D.F., The, H.A.S., Bank, W., 2010. Energy Poverty in Rural and
+Urban India Are the Energy Poor Also Income Poor?.
+Krugmann, H., Goldemberg, J., 1983. The energy cost of satisfying basic human needs.
+Technol. Forecast. Soc. Change 24, 45–60. https://doi.org/10.1016/0040-1625(83)
+90062-8.
+Leach, G., 1987. Household energy in South asia. Biomass 12, 155–184. https://doi.org/
+10.1016/0144-4565(87)90034-5.
+Li, W., Chien, F., Hsu, C.C., Zhang, Y.Q., Nawaz, M.A., Iqbal, S., Mohsin, M., 2021. Nexus
+between energy poverty and energy efficiency: estimating the long-run dynamics.
+Resour. Pol. 72. https://doi.org/10.1016/j.resourpol.2021.102063.
+Martins, A., Madaleno, M., Dias, M.F., 2020. Energy literacy: what is out there to know?
+Energy Rep. 6, 454–459. https://doi.org/10.1016/j.egyr.2019.09.007.
+Mendoza, C.B., Cayonte, D.D.D., Leabres, M.S., Manaligod, L.R.A., 2019. Understanding
+multidimensional energy poverty in the Philippines. Energy Pol. 133. https://doi.
+org/10.1016/j.enpol.2019.110886.
+Mha, G., n.d. Zonal Council. URL https://www.mha.gov.in/en/page/zonal-council
+(accessed 5.1.24).
+MoP&Ng, G., 2023. State-wise active domestic customers of LPG. URL. https://ppac.gov.
+in/consumption/active-domestic-customers, 5.1.24.
+Nayan Yadava, R., Sinha, B., 2019. Developing energy access index for measuring energy
+poverty in forest fringe villages of Madhya Pradesh, India. Sustain. Energy Technol.
+Assessments 31, 167–178. https://doi.org/10.1016/j.seta.2018.12.013.
+Nussbaumer, P., Bazilian, M., Modi, V., 2012. Measuring energy poverty: focusing on
+what matters. Renew. Sustain. Energy Rev. https://doi.org/10.1016/j.
+rser.2011.07.150.
+Okushima, S., 2016. Measuring energy poverty in Japan, 2004–2013. Energy Pol. 98,
+557–564. https://doi.org/10.1016/j.enpol.2016.09.005.
+Pachauri, S., Mueller, A., Kemmler, A., Spreng, D., 2004. On measuring energy poverty in
+Indian households. World Dev. 32, 2083–2104. https://doi.org/10.1016/j.
+worlddev.2004.08.005.
+Pandey, A., Brauer, M., Cropper, M.L., Balakrishnan, K., Mathur, P., Dey, Sagnik,
+Turkgulu, B., 2021. Health and economic impact of air pollution in the states of
+India: the Global Burden of Disease Study 2019. Lancet Planet. Health 5, e25–e38.
+https://doi.org/10.1016/S2542-5196(20)30298-9.
+Papada, L., Kaliampakos, D., 2019. Development of vulnerability index for energy
+poverty. Energy Build. 183, 761–771. https://doi.org/10.1016/j.
+enbuild.2018.11.033.
+Utilities Policy 93 (2025) 101878
+PIB, 2023a. Prandhan Mantri Ujjwala Yojna (PMUY) [WWW Document]. URL. pib.gov.
+in/PressReleaseIframePage.aspx?PRID=1942154, 5.1.24.
+PIB, 2023b. India’s power sector transformation: a journey towards sustainable energy
+and universal access [WWW Document]. URL. https://pib.gov.in/FeaturesDeatils.
+aspx?NoteId=151483, 5.1.24.
+PIB, 2023c. National efficient cooking program and energy efficient fans Programme
+[WWW Document]. URL. https://pib.gov.in/PressReleaseIframePage.aspx?
+PRID=1974191#:~:text=TheNationalEfficientCookingProgramme,andcost-effect
+ivecookingsolutions.
+Practical Action, 2010. Poor People’s Energy Outlook 2010. Practical Action Publishing,
+Rugby, UK.
+Qurat-ul-Ann, A.-R., Mirza, F.M., 2021. Determinants of multidimensional energy
+poverty in Pakistan: a household level analysis. Environ. Dev. Sustain. 23,
+12366–12410. https://doi.org/10.1007/s10668-020-01174-2.
+Rao, F., Tang, Y.M., Chau, K.Y., Iqbal, W., Abbas, M., 2022. Assessment of energy poverty
+and key influencing factors in N11 countries. Sustain. Prod. Consum. 30, 1–15.
+https://doi.org/10.1016/j.spc.2021.11.002.
+Rao, N.D., 2012. Kerosene subsidies in India: when energy policy fails as social policy.
+Energy Sustain. Dev. 16, 35–43. https://doi.org/10.1016/j.esd.2011.12.007.
+Sadath, A.C., Acharya, R.H., 2017. Assessing the extent and intensity of energy poverty
+using Multidimensional Energy Poverty Index: Empirical evidence from households
+in India. Energy Pol. 102, 540–550. https://doi.org/10.1016/j.enpol.2016.12.056.
+Sankhyayan, P., Dasgupta, S., 2019. ‘Availability’ and/or ‘Affordability’:What matters in
+household energy access in India? Energy Pol. 131, 131–143. https://doi.org/
+10.1016/j.enpol.2019.04.019.
+Santill´
+an, O.S., Cedano, K.G., Martínez, M., 2020. Analysis of energy poverty in 7 Latin
+American countries using multidimensional energy poverty index. Energies 13.
+https://doi.org/10.3390/en13071608.
+Sharma, S.V., Han, P., Sharma, V.K., 2019. Socio-economic determinants of energy
+poverty amongst Indian households: a case study of Mumbai. Energy Pol. 132,
+1184–1190. https://doi.org/10.1016/j.enpol.2019.06.068.
+Thomson, H., Bouzarovski, S., Snell, C., 2017. Rethinking the measurement of energy
+poverty in Europe: a critical analysis of indicators and data. Indoor Built Environ. 26,
+879–901. https://doi.org/10.1177/1420326X17699260.
+United Nations, 2023. UN SDG report. URL. https://unstats.un.org/sdgs/report/2023/,
+5.1.24.
+van den Broek, K.L., 2019. Household energy literacy: a critical review and a conceptual
+typology. Energy Res. Social Sci. 57, 101256. https://doi.org/10.1016/j.
+erss.2019.101256.
+Wang, K., Wang, Y.X., Li, K., Wei, Y.M., 2015. Energy poverty in China: an index based
+comprehensive evaluation. Renew. Sustain. Energy Rev. https://doi.org/10.1016/j.
+rser.2015.03.041.
+Winkler, H., Sim˜
+oes, A.F., Rovere, E.L. la, Alam, M., Rahman, A., Mwakasonda, S., 2011.
+Access and affordability of electricity in developing countries. World Dev. 39,
+1037–1050. https://doi.org/10.1016/j.worlddev.2010.02.021.
+Zhao, J., Dong, K., Dong, X., Shahbaz, M., 2022. How renewable energy alleviate energy
+poverty? A global analysis. Renew. Energy 186, 299–311. https://doi.org/10.1016/
+j.renene.2022.01.005.
+References:
+Che, X., Zhu, B., Wang, P., 2021. Assessing global energy poverty: an integrated
+approach. Energy Pol. 149. https://doi.org/10.1016/j.enpol.2020.112099.
+Nussbaumer, P., Nerini, F.F., Onyeji, I., Howells, M., 2013. Global insights based on the
+multidimensional energy poverty index (MEPI). Sustain. Times 5, 2060–2076.
+https://doi.org/10.3390/su5052060.
+Ssennono, V.F., Ntayi, J.M., Buyinza, F., Wasswa, F., Aarakit, S.M., Mukiza, C.N., 2021.
+Energy poverty in Uganda: evidence from a multidimensional approach. Energy
+Econ. 101. https://doi.org/10.1016/j.eneco.2021.105445.
+Szirmai, A., 2010. Towards a New Measurement of Energy Poverty: A Cross-Community
+Analysis of Rural Pakistan.
+Zhao, J., Jiang, Q., Dong, X., Dong, K., 2021. Assessing energy poverty and its effect on
+CO2 emissions: the case of China. Energy Econ. 97. https://doi.org/10.1016/j.
+eneco.2021.105191.
+21

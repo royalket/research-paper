@@ -1,8 +1,8 @@
-region,Piped Water,Tube Well/Borehole,Difference (pp),Piped ÷ Tube Well
-Central,22.4,12.2,10.2,1.84
-East,12.8,9.3,3.5,1.38
-North,21.9,11.2,10.7,1.96
-Northeast,26.2,7.8,18.4,3.36
-South,29.9,20.3,9.6,1.47
-Unknown,19.1,7.3,11.8,2.62
-West,33.5,19.7,13.8,1.7
+region,Piped — Into Dwelling,Piped — Neighbour/Shared,Piped — Public Tap/Standpipe,Piped — Yard/Plot,Tube Well/Borehole,All Piped avg (%),Piped−TW diff (pp),Piped÷TW RR
+Central,23.1,28.1,18.3,24.9,12.2,23.6,11.4,1.93
+East,10.5,13.5,14.1,12.2,9.3,12.6,3.3,1.35
+North,20.6,24.7,22.2,26.5,11.2,23.5,12.3,2.1
+Northeast,23.7,32.3,26.5,27.4,7.8,27.5,19.7,3.53
+South,28.4,33.6,30.6,29.8,20.3,30.6,10.3,1.51
+Unknown,18.8,20.1,19.0,19.7,7.3,19.4,12.1,2.66
+West,28.8,33.2,30.3,40.9,19.7,33.3,13.6,1.69

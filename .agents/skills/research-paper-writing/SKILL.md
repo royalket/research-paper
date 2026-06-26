@@ -30,28 +30,77 @@ Prioritize first-impression quality (figures/tables/layout), logical flow, and e
 8. Use readable, minimal-ink tables.
 9. Keep formatting consistent and tidy.
 
-## Human Style Guardrails
+## Academic Writing Clarity Rules
 
-Use these rules whenever drafting or rewriting text so the prose reads natural, specific, and reviewer-friendly.
+Apply these rules to maintain formal, evidence-grounded prose while removing unnecessary complexity.
 
-1. Write in clear, direct academic language; avoid stiff template-like phrasing.
-2. Prefer specific verbs and concrete nouns over vague filler words.
-3. Vary sentence length and rhythm; avoid repeating the same sentence pattern.
-4. Use natural transitions that show logic (because, however, therefore, in contrast, as a result).
-5. Prefer active voice when it improves clarity; use passive voice only when focus should stay on the process or result.
-6. Avoid exaggerated claims and hype words (novel, groundbreaking, revolutionary) unless evidence strongly supports them.
-7. Avoid generic AI-style padding (it is important to note that, in order to, this paper aims to).
-8. Keep claims concrete and measurable wherever possible.
+1. **Remove jargon:** Replace field-specific buzzwords with precise, plain terms unless the term is standard in your venue.
+   - Before: "This approach leverages synergistic mechanisms."
+   - After: "This approach combines X and Y."
 
-## Anti-Robotic Quick Check
+2. **Fix attribution:** Replace vague claims ("experts say", "it is known that") with specific sources or evidence.
+   - Before: "Recent studies show significant improvements."
+   - After: "Smith et al. (2023) reported a 23% improvement on benchmark X."
 
-Before returning a revised paragraph, verify all points below.
+3. **Simplify overcomplexity:** Break nested clauses and remove redundant qualifiers while keeping formality.
+   - Before: "The experimental results, which demonstrated clear and measurable improvements, indicate that our method is potentially superior."
+   - After: "Results show that our method improves accuracy by 5% on standard benchmarks."
 
-1. Can this sentence be made shorter without losing meaning?
-2. Did I use any repetitive transition or phrase more than once in the paragraph?
-3. Is each claim tied to a specific mechanism, result, or citation?
-4. Would a domain reviewer read this as precise rather than promotional?
-5. Does the paragraph still sound natural when read aloud?
+4. **Keep formality:** Use third person and objective tone; avoid personal commentary.
+   - Before: "I believe this is important because..."
+   - After: "This is important because the evidence shows..."
+
+5. **Verify every claim:** Each factual or empirical claim must be supported by a citation, experiment, or table reference.
+
+6. **Avoid filler language:** Cut phrases like "notably," "interestingly," "it is worth noting," "in light of the fact that."
+
+## Empirical Results Reporting (for quantitative papers)
+
+Apply these standards when writing Results sections with statistical findings.
+
+1. **State point estimates with confidence intervals:** Always report 95% CI or credible intervals, not just p-values.
+   - Before: "The effect was significant (p < 0.001)."
+   - After: "Households in the richest wealth quintile had 4.4× higher odds of water treatment (95% CI: 4.27–4.59, p < 0.001)."
+
+2. **Interpret effect sizes concretely:** Translate odds ratios, hazard ratios, or standardized coefficients into real-world meaning.
+   - Before: "AOR = 1.830 for higher education."
+   - After: "Households with higher education had 1.83× higher odds of treating water (83% increase)."
+
+3. **Make table captions self-contained:** A reader should understand the table without reading surrounding text.
+   - Before: "Table 3 presents the results."
+   - After: "Table 3. Weighted descriptive statistics for predictor variables and overall water treatment prevalence (41.7%), NFHS-5 (n = 636,699). Percentages are weighted estimates; sample counts are unweighted."
+
+4. **Link every key result to a figure or table:** Avoid stating results without reference.
+   - Before: "Water treatment varies by region."
+   - After: "Water treatment prevalence ranged from 95% in Nagaland and Kerala to <10% in Bihar (Figure 1, Table S4)."
+
+## Discussion-to-Results Alignment
+
+When writing Discussion sections:
+
+1. **Open with result summaries:** Restate key findings (percentages, effect sizes) before interpretation.
+   - Before: "Our findings align with existing literature."
+   - After: "We found 41.7% of households treat water, with boiling (38.3%) and cloth straining (35.6%) most common. The strongest predictors were wealth (AOR=4.4) and education (AOR=1.83)."
+
+2. **Compare to cited studies:** Show how your effect sizes compare to prior work.
+   - Before: "Similar to Daniel et al."
+   - After: "Daniel et al. (2019) reported education as a key predictor in rural Nepal; we found a comparable effect (AOR=1.83) across all Indian households."
+
+3. **Address limitations honestly:** Acknowledge what your data cannot show.
+   - Before: "A limitation is reliance on secondary data."
+   - After: "NFHS data do not include direct water quality measurements; our analysis relies on self-reported treatment practices, which may overestimate actual effectiveness."
+
+## Limitations Framing
+
+Structure limitations to advance, not weaken, your contribution:
+
+1. **State the limitation clearly.**
+2. **Explain why it matters (not just "future work needs to...").**
+3. **Link to implications: What would change if this limitation were addressed?**
+
+Example for your paper:
+- Before: "A limitation is that NFHS data are cross-sectional."
+- After: "NFHS-5 is cross-sectional, preventing causal inference about whether wealth drives water treatment adoption or vice versa. Longitudinal data would clarify whether improved household economics lead to increased treatment adoption, which would inform timing of intervention strategies."
 
 ## Paragraph Clarity Check (Important)
 
@@ -111,7 +160,6 @@ Use `references/paper-review.md` for the full checklist and workflow.
 5. If a claim cannot be supported by results, weaken or remove the claim.
 6. Before finalizing, append and answer a five-dimension self-review question list, then revise the paper based on unresolved items.
 7. Do not load all section references (Introduction/Abstract/Related Work/Method/Experiments/Conclusion) at once; load only the specific section guide needed for the current edit target.
-8. Enforce Human Style Guardrails and pass the Anti-Robotic Quick Check before final output.
 
 ## Output Contract
 
