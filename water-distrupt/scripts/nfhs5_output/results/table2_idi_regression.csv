@@ -1,10 +1,8 @@
 Variable,OR,95% CI,p-value,Significant
-Piped Water (vs non-piped),2.088,1.844–2.364,<0.001***,✓
-IDI Score,1.007,1.005–1.009,<0.001***,✓
-Piped × IDI  [KEY INTERACTION],0.996,0.993–0.998,0.002**,✓
-Wealth Quintile,0.974,0.962–0.986,<0.001***,✓
-Urban,1.037,1.000–1.075,0.051,
-SC/ST household,1.105,1.080–1.130,<0.001***,✓
-Female-headed household,0.975,0.954–0.996,0.022*,✓
-Household size,1.024,1.020–1.029,<0.001***,✓
-Children under 5,1.003,0.992–1.015,0.586,
+Piped Water (vs non-piped),2.229,2.168–2.291,<0.001***,✓
+Wealth Quintile,0.968,0.959–0.978,<0.001***,✓
+Urban,1.043,1.006–1.081,0.024*,✓
+SC/ST household,1.104,1.079–1.130,<0.001***,✓
+Female-headed household,0.977,0.956–0.998,0.034*,✓
+Household size,1.024,1.019–1.028,<0.001***,✓
+Children under 5,1.003,0.992–1.015,0.579,

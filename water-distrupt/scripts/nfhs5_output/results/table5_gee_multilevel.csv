@@ -1,9 +1,7 @@
 Variable,OR,95% CI,p-value,Significant
-IDI Score (std),0.897,0.844–0.953,<0.001***,✓
-RGI Score (std),1.675,1.619–1.732,<0.001***,✓
-IDI × RGI  [CROSS-LEVEL INTERACTION],1.037,0.995–1.080,0.083,
-Piped Water,2.293,2.016–2.608,<0.001***,✓
-Wealth Quintile,0.928,0.911–0.946,<0.001***,✓
-Urban,1.106,1.034–1.183,0.004**,✓
-SC/ST household,1.077,1.035–1.121,<0.001***,✓
-Female-headed,1.003,0.972–1.035,0.867,
+RGI Score (std)  [DISTRICT UNDERPERFORMANCE],1.715,1.659–1.773,<0.001***,✓
+Piped Water,1.914,1.788–2.049,<0.001***,✓
+Wealth Quintile,0.939,0.924–0.955,<0.001***,✓
+Urban,1.102,1.029–1.179,0.005**,✓
+SC/ST household,1.079,1.037–1.124,<0.001***,✓
+Female-headed,1.001,0.969–1.033,0.968,

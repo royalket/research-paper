@@ -45,43 +45,50 @@ warnings.filterwarnings("ignore")
 # DIMENSION SCORING
 # ─────────────────────────────────────────────────────────────────────────────
 
-def score_dim1_source_diversity(df: pd.DataFrame,
-                                piped_sources: Optional[list] = None) -> pd.Series:
+def score_dim_source_risk(df: pd.DataFrame) -> pd.Series:
     """
-    Dimension 1 — Source Lock-in (lack of fallback).
+    Dimension A — Source Risk (merged from old Dims 1 and 3).
 
-    Uses piped_flag (set by data_pipeline from PIPED_SOURCES list) so it
-    stays correct regardless of how piped sub-type names change in config.
+    Old Dim 1 (backup availability) and old Dim 3 (system dependency) asked
+    the same underlying question: how locked in are you to a system you do not
+    control? In NFHS-5 they correlate at r = 0.873 because both score high for
+    piped households and low for tube-well households. Keeping them separate
+    double-counted the same signal. This merged dimension asks the question once.
 
     Score │ Situation
     ──────┼──────────────────────────────────────────────────────────
-      3   │ Piped primary + no alternative  OR  piped + piped alt
-          │   → completely dependent on one centralised system
-      2   │ Piped primary + non-piped alternative
-          │   → system-dependent but has an escape route
-      1   │ Non-piped primary + same-type alternative
-          │   → some diversity but limited
-      0   │ Non-piped primary + different-type alternative
-          │   → genuinely diversified, lowest lock-in
+      3   │ Piped primary + no non-piped backup
+          │   → maximum centralised dependency, no escape route
+      2   │ Piped + non-piped backup exists  OR  tanker/bottled primary
+          │   → dependent but has an exit; or pure market dependency
+      1   │ Community managed (RO plant, protected well/spring)
+          │   → semi-managed, some local control
+      0   │ Tube well, own well, rainwater, surface water
+          │   → self-sufficient, household controls access
     """
-    if piped_sources is None:
-        piped_sources = []
+    scores = pd.Series(0.0, index=df.index)
+    src    = df["water_source"]
 
-    scores        = pd.Series(0.0, index=df.index)
-    primary_piped = df["piped_flag"] == 1
-    no_alt        = df["alt_source"] == "No Other Source"
-    # alt is piped if it matches any piped sub-type label
-    alt_piped     = df["alt_source"].isin(piped_sources) if piped_sources \
-                    else df["alt_source"].str.startswith("Piped")
-    alt_exists    = ~no_alt
+    # Score 1 — community managed (set first, overridden by higher scores below)
+    scores[src.isin(["Community RO Plant",
+                     "Protected Well", "Protected Well/Spring",
+                     "Protected Spring"])] = 1.0
 
-    scores[primary_piped & (no_alt | alt_piped)] = 3.0
-    scores[primary_piped & alt_exists & ~alt_piped] = 2.0
-    same_cat = (
-        ~primary_piped & alt_exists &
-        (df["water_source"] == df["alt_source"])
-    )
-    scores[same_cat] = 1.0
+    # Score 2 — tanker/bottled (market dependent, no piped backup issue)
+    scores[src.isin(["Tanker Truck", "Cart with Small Tank",
+                     "Tanker/Cart", "Bottled Water"])] = 2.0
+
+    # Score 2 — piped with a non-piped backup (if hv202 were recorded)
+    # In NFHS-5 hv202 is not recorded — all households show "No Other Source"
+    # so this case never occurs in practice; kept for completeness
+    alt_exists = df["alt_source"] != "No Other Source"
+    alt_piped  = df["alt_source"].str.startswith("Piped", na=False)
+    scores[(df["piped_flag"] == 1) & alt_exists & ~alt_piped] = 2.0
+
+    # Score 3 — piped with no non-piped backup (the dominant piped case)
+    no_alt = df["alt_source"] == "No Other Source"
+    scores[(df["piped_flag"] == 1) & (no_alt | alt_piped)] = 3.0
+
     return scores
 
 
@@ -124,30 +131,6 @@ def score_dim2_access_complexity(df: pd.DataFrame) -> pd.Series:
     return scores
 
 
-def score_dim3_system_dependency(df: pd.DataFrame) -> pd.Series:
-    """
-    Dimension 3 — Market / System Dependency.
-
-    How much does alternative sourcing require money or formal systems?
-    Uses piped_flag so it works regardless of how piped sub-types are named.
-
-    Score │ Situation
-    ──────┼──────────────────────────────────────────────────────────
-      3   │ Tanker / bottled  → pure market, expensive, unreliable
-      2   │ Piped (any sub-type) → single centralised point of failure
-      1   │ Community RO / protected well or spring → semi-managed
-      0   │ Own well / rainwater / surface → self-sufficient
-    """
-    scores = pd.Series(0.0, index=df.index)
-    src    = df["water_source"]
-
-    scores[src.isin(["Tanker Truck", "Cart with Small Tank",
-                     "Tanker/Cart", "Bottled Water"])]        = 3.0
-    scores[df["piped_flag"] == 1]                             = 2.0
-    scores[src.isin(["Community RO Plant",
-                     "Protected Well", "Protected Well/Spring",
-                     "Protected Spring"])]                    = 1.0
-    return scores
 
 
 def score_dim4_coping_buffer(df: pd.DataFrame) -> pd.Series:
@@ -491,8 +474,8 @@ class IDIBuilder:
       idi_ci_width : CI width (higher = more uncertain)
     """
 
-    # All four dims are positive-valence lock-in scores (0–3 each)
-    DIM_COLS = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4"]
+    # Three dims — Dim A (source risk, merged from old Dims 1+3), Dim B (access), Dim C (coping)
+    DIM_COLS = ["idi_dimA", "idi_dimB", "idi_dimC"]
 
     def __init__(self, df: pd.DataFrame, cfg: Config):
         self.df          = df.copy()
@@ -509,12 +492,13 @@ class IDIBuilder:
         print("=" * 60)
 
         # 1. Score dimensions (all positive-valence: higher = more locked in)
-        piped_sources = getattr(self.cfg, "PIPED_SOURCES", [])
-        self.df["idi_dim1"] = score_dim1_source_diversity(self.df, piped_sources)
-        self.df["idi_dim2"] = score_dim2_access_complexity(self.df)
-        self.df["idi_dim3"] = score_dim3_system_dependency(self.df)
-        # Dim 4: coping deficit — 3 minus buffer, so poorest/no-assets = 3
-        self.df["idi_dim4"] = score_dim4_coping_buffer(self.df)
+        # Dim A: Source Risk (merged from old Dims 1+3 — they correlated at 0.873,
+        #        both asking "how locked in is your source situation?")
+        self.df["idi_dimA"] = score_dim_source_risk(self.df)
+        # Dim B: Access Complexity (fetching experience)
+        self.df["idi_dimB"] = score_dim2_access_complexity(self.df)
+        # Dim C: Piped Coping Deficit (piped households only)
+        self.df["idi_dimC"] = score_dim4_coping_buffer(self.df)
 
         # Internal consistency
         alpha = cronbach_alpha(self.df, self.DIM_COLS)
@@ -689,8 +673,13 @@ class IDIBuilder:
 
     @property
     def pca_loadings(self) -> pd.DataFrame:
+        dim_names = {
+            "idi_dimA": "Dim A: Source Risk (merged)",
+            "idi_dimB": "Dim B: Access Complexity",
+            "idi_dimC": "Dim C: Piped Coping Deficit",
+        }
         return pd.DataFrame({
-            "Dimension":        self.DIM_COLS,
+            "Dimension":        [dim_names.get(c, c) for c in self.DIM_COLS],
             "Loading (PC1)":    self.loadings.round(4),
             "Contribution (%)": (
                 self.loadings**2 / (self.loadings**2).sum() * 100

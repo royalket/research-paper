@@ -328,10 +328,9 @@ class IDIDimensionTable:
     """
 
     DIM_LABELS = {
-        "idi_dim1": "Dim 1: Source Lock-in (0–3)",
-        "idi_dim2": "Dim 2: Access Complexity (0–3)",
-        "idi_dim3": "Dim 3: System Dependency (0–3)",
-        "idi_dim4": "Dim 4: Coping Deficit (0–3)",
+        "idi_dimA": "Dim A: Source Risk (0–3)",
+        "idi_dimB": "Dim B: Access Complexity (0–3)",
+        "idi_dimC": "Dim C: Piped Coping Deficit (0–3)",
         "idi_mean": "IDI Composite (0–100)",
     }
 
@@ -369,7 +368,7 @@ class IDIDimensionTable:
         """Fallback: recompute profiles from df if IDIBuilder profiles not passed."""
         df      = self.df
         cfg     = self.cfg
-        dim_cols = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4", "idi_mean"]
+        dim_cols = ["idi_dimA", "idi_dimB", "idi_dimC", "idi_mean"]
         dim_cols = [c for c in dim_cols if c in df.columns]
         tables  = {}
 
@@ -421,7 +420,7 @@ class IDIDimensionTable:
         cfg     = self.cfg
         outcome = cfg.VAR_DISRUPTED
 
-        dim_cols = [c for c in ["idi_dim1","idi_dim2","idi_dim3","idi_dim4"]
+        dim_cols = [c for c in ["idi_dimA","idi_dimB","idi_dimC"]
                     if c in df.columns and outcome in df.columns]
 
         rows = []
@@ -468,10 +467,10 @@ class IDIFigures:
                and tube well sits bottom-left (low IDI, low disruption).
     """
 
-    DIM_COLS   = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4"]
-    DIM_LABELS = ["Dim 1: Source Lock-in", "Dim 2: Access Complexity",
-                  "Dim 3: System Dependency", "Dim 4: Coping Deficit"]
-    DIM_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+    DIM_COLS   = ["idi_dimA", "idi_dimB", "idi_dimC"]
+    DIM_LABELS = ["Dim A: Source Risk", "Dim B: Access Complexity",
+                  "Dim C: Piped Coping Deficit"]
+    DIM_COLORS = ["#1f77b4", "#ff7f0e", "#d62728"]
 
     def __init__(self, df: pd.DataFrame, cfg: Config):
         self.df  = df
@@ -791,6 +790,215 @@ class IDIRegression:
                 rows.append({"Scenario": sc["Scenario"],
                              "Predicted Prob (%)": np.nan})
         return pd.DataFrame(rows)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CATEGORICAL AOR REGRESSION TABLE
+# ─────────────────────────────────────────────────────────────────────────────
+
+class CategoricalAORRegression:
+    """
+    Multivariate logistic regression reporting AOR (adjusted odds ratio) for
+    each category of each predictor, with a reference category clearly marked.
+
+    Format mirrors standard NFHS-based public health papers:
+      Predictor | Category | AOR | CI lower | CI upper | Significance
+
+    Predictors (all categorical, dummied with reference category):
+      - water_source        (reference: Tube Well/Borehole)
+      - wealth_quintile     (reference: Poorest)
+      - residence           (reference: Rural)
+      - caste               (reference: SC)
+      - hh_head_sex         (reference: Female)
+      - head_education      (reference: No Education)
+      - house_type          (reference: Katcha)
+      - toilet_type         (reference: No facility/OD)
+      - time_to_water       (reference: ≥60 min / on-premises split)
+      - season              (reference: Winter)
+      - region              (reference: North)
+    """
+
+    def __init__(self, df: pd.DataFrame, cfg: Config):
+        self.df  = df
+        self.cfg = cfg
+
+    def run(self) -> pd.DataFrame:
+        print("\n" + "=" * 60)
+        print("ANALYSIS — Categorical AOR Regression Table")
+        print("=" * 60)
+
+        cfg = self.cfg
+        df  = self.df.copy()
+
+        # ── Prepare categorical variables with explicit reference categories ──
+
+        # Water source — group into analysis-relevant categories
+        def categorise_source(s):
+            if s in cfg.PIPED_SOURCES:
+                return "Piped Water"
+            elif s == "Tube Well/Borehole":
+                return "Tube Well/Borehole"
+            elif s in ["Protected Well", "Protected Spring",
+                       "Community RO Plant"]:
+                return "Protected/Community"
+            elif s in ["Unprotected Well", "Unprotected Spring",
+                       "Surface Water (river/lake/canal)"]:
+                return "Unprotected/Surface"
+            elif s in ["Tanker Truck", "Cart with Small Tank",
+                       "Bottled Water"]:
+                return "Tanker/Bottled"
+            else:
+                return "Other"
+
+        df["source_cat"] = df["water_source"].apply(categorise_source)
+
+        # Time to water — map existing categories to analysis tiers
+        def time_tier(row):
+            if row.get("water_on_premises") == 1:
+                return "On premises"
+            loc  = row.get("water_location", "")
+            mins = row.get("time_to_water_min", np.nan)
+            if loc == "In Yard/Plot":
+                return "< 15 min"
+            if pd.notna(mins):
+                if mins < 15:  return "< 15 min"
+                if mins < 30:  return "15–30 min"
+                if mins < 60:  return "30–60 min"
+            return "> 60 min"
+
+        df["time_tier"] = df.apply(time_tier, axis=1)
+
+        # Toilet type — simplified
+        def toilet_cat(s):
+            if pd.isna(s) or s == "Unknown":
+                return "No facility/OD"
+            if s == "Flush":
+                return "Flush toilet"
+            if s in ["Improved pit"]:
+                return "Other improved toilet"
+            if s in ["Unimproved pit"]:
+                return "Pit latrine"
+            return "No facility/OD"
+
+        if "toilet_type" in df.columns:
+            df["toilet_cat"] = df["toilet_type"].apply(toilet_cat)
+        else:
+            df["toilet_cat"] = "No facility/OD"
+
+        # House type
+        if "house_type" not in df.columns:
+            df["house_type"] = "Unknown"
+
+        # HH head sex
+        if "female_headed" in df.columns:
+            df["hh_head_sex"] = df["female_headed"].map({1: "Female", 0: "Male"})
+        else:
+            df["hh_head_sex"] = "Male"
+
+        # ── Define reference categories ────────────────────────────────────
+        ref = {
+            "source_cat":      "Tube Well/Borehole",
+            "wealth_quintile": "Poorest",
+            "residence":       "Rural",
+            "caste":           "SC",
+            "hh_head_sex":     "Female",
+            "head_education":  "No Education",
+            "house_type":      "Pucca",
+            "toilet_cat":      "No facility/OD",
+            "time_tier":       "> 60 min",
+            "season":          "Winter",
+            "region":          "North",
+        }
+
+        cat_vars = list(ref.keys())
+
+        # ── Keep only complete cases ───────────────────────────────────────
+        needed = [cfg.VAR_DISRUPTED, "weight", cfg.VAR_PSU] + cat_vars
+        needed = [c for c in needed if c in df.columns]
+        df_reg  = df.dropna(subset=needed).copy()
+
+        if len(df_reg) < 500:
+            print("  ⚠  Too few complete cases for AOR regression.")
+            return pd.DataFrame()
+
+        # ── Set reference levels and dummy-encode ─────────────────────────
+        for var, ref_cat in ref.items():
+            if var not in df_reg.columns:
+                continue
+            df_reg[var] = df_reg[var].astype(str)
+            cats = sorted(df_reg[var].unique())
+            if ref_cat in cats:
+                cats = [ref_cat] + [c for c in cats if c != ref_cat]
+            df_reg[var] = pd.Categorical(df_reg[var], categories=cats)
+
+        formula_terms = " + ".join(f"C({v}, Treatment('{ref[v]}'))"
+                                   for v in cat_vars if v in df_reg.columns)
+        formula = f"{cfg.VAR_DISRUPTED} ~ {formula_terms}"
+
+        print(f"  Fitting categorical AOR on {len(df_reg):,} households...")
+
+        try:
+            model = smf.logit(
+                formula=formula, data=df_reg,
+                freq_weights=df_reg["weight"],
+            ).fit(
+                disp=False, maxiter=500,
+                cov_type="cluster",
+                cov_kwds={"groups": df_reg[cfg.VAR_PSU]},
+            )
+        except Exception as e:
+            print(f"  ✗  AOR regression failed: {e}")
+            return pd.DataFrame()
+
+        # ── Format as paper-ready table ────────────────────────────────────
+        params = model.params
+        conf   = model.conf_int()
+        pvals  = model.pvalues
+
+        rows = []
+        for var, ref_cat in ref.items():
+            if var not in df_reg.columns:
+                continue
+
+            # Reference row
+            rows.append({
+                "Predictor":    var.replace("_", " ").title(),
+                "Category":     f"{ref_cat}  ← reference",
+                "AOR":          "—",
+                "CI Lower":     "—",
+                "CI Upper":     "—",
+                "Significance": "ref",
+            })
+
+            # Non-reference categories
+            cats = [c for c in df_reg[var].cat.categories if c != ref_cat]
+            for cat in sorted(cats):
+                term = f"C({var}, Treatment('{ref_cat}'))[T.{cat}]"
+                if term not in params.index:
+                    continue
+                aor = np.exp(params[term])
+                lo  = np.exp(conf.loc[term, 0])
+                hi  = np.exp(conf.loc[term, 1])
+                p   = pvals[term]
+                sig = ("***" if p < 0.001 else
+                       "**"  if p < 0.01  else
+                       "*"   if p < 0.05  else "ns")
+                rows.append({
+                    "Predictor":    "",
+                    "Category":     cat,
+                    "AOR":          round(aor, 3),
+                    "CI Lower":     round(lo, 3),
+                    "CI Upper":     round(hi, 3),
+                    "Significance": sig,
+                })
+
+        tbl = pd.DataFrame(rows)
+
+        out = cfg.OUTPUT_DIR / "results" / "table_aor_categorical.csv"
+        tbl.to_csv(out, index=False)
+        print(f"\n  AOR table → {out}")
+        print(tbl.to_string(index=False))
+        return tbl
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1454,11 +1662,15 @@ class Analyzer:
         # IDI figures — Figure 1 (stacked bar by wealth) + Figure 2 (scatter by source)
         IDIFigures(self.df, self.cfg).run_all()
 
-        # Finding 2
+        # Finding 2 — clean piped OR without IDI collinearity
         idi_reg = IDIRegression(self.df, self.cfg)
         coef_tbl, pred_tbl = idi_reg.run()
         all_tables["regression_coefs"] = coef_tbl
         all_tables["predicted_probs"]  = pred_tbl
+
+        # Finding 2b — categorical AOR table (all predictors as dummies)
+        aor = CategoricalAORRegression(self.df, self.cfg)
+        all_tables["aor_categorical"] = aor.run()
 
         # Finding 3
         spatial  = SpatialTables(dist_df, self.cfg)
