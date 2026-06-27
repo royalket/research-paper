@@ -1,6 +1,6 @@
-wealth_quintile,Dim 1: Source Lock-in,Dim 2: Access Complexity,Dim 3: System Dependency,Dim 4: Coping Deficit,IDI Composite (0–100)
-Poorest,0.975,1.995,0.686,0.933,32.814
-Poorer,1.422,2.374,1.024,1.25,44.107
-Middle,1.772,2.578,1.307,0.731,46.375
-Richer,1.948,2.754,1.483,0.073,44.756
-Richest,2.134,2.898,1.624,0.0,47.711
+wealth_quintile,Dim A: Source Risk,Dim B: Access Complexity,Dim C: Piped Coping Deficit,IDI Composite (0–100)
+Poorest,1.005,1.995,0.933,37.289
+Poorer,1.483,2.374,1.25,49.246
+Middle,1.871,2.578,0.731,46.719
+Richer,2.092,2.754,0.073,40.077
+Richest,2.29,2.898,0.0,41.94

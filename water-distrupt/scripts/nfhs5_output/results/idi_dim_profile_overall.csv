@@ -1,6 +1,5 @@
 ,Dimension,Mean Score,SD,PCA Loading
-0,Dim 1: Source Lock-in,1.608,1.496,0.622
-1,Dim 2: Access Complexity,2.487,1.002,0.128
-2,Dim 3: System Dependency,1.19,0.998,0.606
-3,Dim 4: Coping Deficit,0.649,1.098,0.478
-4,IDI Composite (0–100),42.752,29.624,
+0,Dim A: Source Risk,1.701,1.44,0.715
+1,Dim B: Access Complexity,2.487,1.002,0.15
+2,Dim C: Piped Coping Deficit,0.649,1.098,0.683
+3,IDI Composite (0–100),43.145,30.123,

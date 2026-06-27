@@ -563,19 +563,18 @@ class IDIBuilder:
         aggregate IDI alone can obscure which structural factor drives lock-in.
 
         Returns a dict with keys:
-          "by_wealth"  — rows: wealth quintile, cols: dim1–dim4 + idi_mean
-          "by_urban"   — rows: Urban/Rural, cols: dim1–dim4 + idi_mean
-          "by_source"  — rows: water source category, cols: dim1–dim4 + idi_mean
+          "by_wealth"  — rows: wealth quintile, cols: dimA–dimC + idi_mean
+          "by_urban"   — rows: Urban/Rural, cols: dimA–dimC + idi_mean
+          "by_source"  — rows: water source category, cols: dimA–dimC + idi_mean
           "overall"    — single-row summary with means and PCA loadings
         """
         df  = self.df
         agg_cols = self.DIM_COLS + ["idi_mean"]
 
         dim_labels = {
-            "idi_dim1": "Dim 1: Source Lock-in",
-            "idi_dim2": "Dim 2: Access Complexity",
-            "idi_dim3": "Dim 3: System Dependency",
-            "idi_dim4": "Dim 4: Coping Deficit",
+            "idi_dimA": "Dim A: Source Risk",
+            "idi_dimB": "Dim B: Access Complexity",
+            "idi_dimC": "Dim C: Piped Coping Deficit",
             "idi_mean": "IDI Composite (0–100)",
         }
 

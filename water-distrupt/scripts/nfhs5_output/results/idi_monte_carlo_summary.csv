@@ -1,8 +1,8 @@
 Metric,Value
-OR(Piped) — Mean,1.753
-OR(Piped) — 2.5th pctile,1.724
-OR(Piped) — 97.5th pctile,1.78
-OR(Piped × IDI) — Mean,0.817
-OR(Piped × IDI) — 2.5th pctile,0.803
-OR(Piped × IDI) — 97.5th pctile,0.832
+OR(Piped) — Mean,1.925
+OR(Piped) — 2.5th pctile,1.895
+OR(Piped) — 97.5th pctile,1.957
+OR(Piped × IDI) — Mean,0.821
+OR(Piped × IDI) — 2.5th pctile,0.804
+OR(Piped × IDI) — 97.5th pctile,0.837
 % MC runs OR(Piped) > 1.0  [ROBUSTNESS],100.0

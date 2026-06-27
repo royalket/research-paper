@@ -1,0 +1,47 @@
+Predictor,Category,AOR,CI Lower,CI Upper,Significance
+Source Cat,Tube Well/Borehole  ← reference,—,—,—,ref
+,Other,1.531,1.252,1.873,***
+,Piped Water,2.388,2.315,2.463,***
+,Protected/Community,1.334,1.254,1.419,***
+,Tanker/Bottled,1.547,1.434,1.669,***
+,Unprotected/Surface,1.196,1.115,1.283,***
+Wealth Quintile,Poorest  ← reference,—,—,—,ref
+,Middle,1.148,1.11,1.187,***
+,Poorer,1.069,1.041,1.098,***
+,Richer,1.109,1.067,1.153,***
+,Richest,0.94,0.897,0.985,**
+Residence,Rural  ← reference,—,—,—,ref
+,Urban,1.058,1.021,1.097,**
+Caste,SC  ← reference,—,—,—,ref
+,General,0.967,0.937,0.999,*
+,OBC,0.933,0.908,0.959,***
+,ST,1.049,1.01,1.09,*
+,Unknown,0.881,0.835,0.929,***
+Hh Head Sex,Female  ← reference,—,—,—,ref
+,Male,1.043,1.022,1.065,***
+Head Education,No Education  ← reference,—,—,—,ref
+,Higher,0.912,0.883,0.943,***
+,Primary,0.987,0.965,1.01,ns
+,Secondary,0.96,0.941,0.98,***
+,Unknown,0.904,0.719,1.137,ns
+House Type,Pucca  ← reference,—,—,—,ref
+,Katcha,0.746,0.712,0.782,***
+,Semi-pucca,0.797,0.764,0.831,***
+,Unknown,0.832,0.759,0.912,***
+Toilet Cat,No facility/OD  ← reference,—,—,—,ref
+Time Tier,> 60 min  ← reference,—,—,—,ref
+,15–30 min,0.538,0.488,0.592,***
+,30–60 min,0.718,0.651,0.792,***
+,< 15 min,0.431,0.393,0.474,***
+,On premises,0.485,0.442,0.533,***
+Season,Winter  ← reference,—,—,—,ref
+,Monsoon,1.053,1.009,1.098,*
+,Post-monsoon,0.848,0.809,0.889,***
+,Summer,0.926,0.887,0.967,***
+Region,North  ← reference,—,—,—,ref
+,Central,0.941,0.889,0.996,*
+,East,0.681,0.646,0.719,***
+,Northeast,1.172,1.105,1.242,***
+,South,1.516,1.439,1.597,***
+,Unknown,0.702,0.663,0.743,***
+,West,1.773,1.665,1.889,***

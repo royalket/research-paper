@@ -107,9 +107,9 @@ def main():
     done(f"{n:,} clean households ready")
 
     # ── 3. IDI ────────────────────────────────────────────────────────────
-    step(3, "Building IDI  (4 dims → PCA → Monte Carlo CI)")
+    step(3, "Building IDI  (3 dims → PCA → Monte Carlo CI)")
     p("  Sub-steps:")
-    p("    3a  Score 4 dimensions per household")
+    p("    3a  Score 3 dimensions per household (Dim A=Source Risk, B=Access, C=Coping)")
     p("    3b  Fit PCA → empirical weights")
     p(f"   3c  Monte Carlo  {cfg.MONTE_CARLO_RUNS} runs  [progress every 100 runs]")
     p("    3d  Validate: Cronbach α, AUC, discriminant validity")
