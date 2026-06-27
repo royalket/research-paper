@@ -113,173 +113,167 @@ used in regressions where we need a single piped/not-piped contrast.
 
 ## Part 2 — The Infrastructure Dependency Index (IDI)
 
-### 2.1 Why Build an Index Instead of Just Using Piped Flag?
+### 2.1 What the IDI is — in one sentence
 
-We could put `piped_flag = 1` in the regression and stop there. The problem is that tells us
-**whether** the paradox exists, but not **why**. Two piped households can have very different
-experiences when the tap runs dry:
+**The IDI measures: when your tap fails, how stuck are you?**
 
-- **Household A:** Piped into dwelling, no alternative source, no vehicle, no refrigerator,
-  poorest wealth quintile. When the tap fails: no experience fetching water, no storage, no
-  money for tankers, no way to get elsewhere.
+That is it. It is not measuring how bad your water is or how poor you are. It is measuring
+whether you have anywhere to turn when your primary source stops working.
 
-- **Household B:** Piped into dwelling, but also has a protected well nearby, a motorcycle,
-  a fridge, and middle-quintile wealth. When the tap fails: fetch from the well with the
-  motorcycle, store water in fridge.
+---
 
-Both have `piped_flag = 1`. Only Household A is truly "locked in." The IDI captures this
-difference by scoring four dimensions of lock-in and combining them into a single number.
+### 2.2 Why we built it — and what it adds over piped_flag
 
-**Three reasons for a composite index:**
-1. **Conceptual:** No single variable captures lock-in. We need to combine source diversity,
-   access experience, system dependency, and coping capacity.
-2. **Statistical:** Testing one index avoids inflating Type I error across multiple tests.
-3. **Policy:** "Target households with IDI > 60 in CRISIS districts" is actionable in a way
-   that a list of four separate conditions is not.
+The logistic regression already tells us piped water causes more disruption.
+`piped_flag` does that job. The IDI does something different.
 
-### 2.2 Dimension 1 — Source Lock-in
+**`piped_flag` tells you THAT the paradox exists.**
+**The IDI tells you WHY some piped households are worse off than others.**
 
-**The question it answers:** If the primary source fails, does the household have any
-non-piped backup they can use?
+Two piped households sitting next to each other can have completely different outcomes
+when the tap fails:
 
-**Why this is the most important dimension (PCA loading: 0.622):** The paradox mechanism
-is fundamentally about lock-in to a single centralised system. A household that has a tube
-well as backup can survive a piped failure. A household that has only piped water — or only
-another piped connection as backup — has nowhere to turn.
+| | Household A — fully stuck | Household B — can cope |
+|---|---|---|
+| Source | Piped, no backup | Piped, but has a tube well nearby |
+| Experience | Never fetched water in their life | Fetches from the well sometimes |
+| Assets | No fridge, no vehicle, poor | Has a motorcycle and a fridge |
+| When tap fails | Completely helpless | Fetches from the well, stores in fridge |
 
-**How we score it (0–3, higher = more locked in):**
+Both are `piped_flag = 1`. The IDI gives Household A a score near 100 and Household B
+a score near 30.
 
-| Score | Situation | Why this score |
-|-------|-----------|----------------|
-| 3 | Piped primary AND (no alternative OR piped alternative) | Completely dependent on centralised system. If piped fails, nothing. |
-| 2 | Piped primary AND non-piped alternative exists | Has an escape route but doesn't normally use it. Still primarily locked in. |
-| 1 | Non-piped primary AND same-category alternative | Some diversity, but both alternatives could fail for the same reason (e.g., both tube wells during drought). |
-| 0 | Non-piped primary AND different-category alternative | Genuinely diversified. Lowest lock-in. |
+**The key finding the IDI reveals:** Rich piped households are more locked in
+(Dims 1 and 3 both high) but they have coping assets (Dim 4 near zero).
+Poor piped households are less locked in (less likely to be piped at all) but
+when they ARE piped, they have nothing when the tap fails (Dim 4 = 0.933).
+`piped_flag` cannot show this split at all.
 
-**Variables used:** `hv201` (primary source) → `piped_flag`, `hv202` (alternative source) → `alt_source`
+**Important:** The IDI is used ONLY descriptively — in tables and figures.
+It is NOT put in the regression models. Why? Because IDI is mostly built from
+piped adoption (Dims 1, 2, and 3 all score high when you are piped), so putting
+both IDI and piped_flag in the same regression causes them to fight over the same
+variance and produce wrong-direction results. The regression uses `piped_flag` for
+the causal finding. The IDI is used for the "who is worst affected and why" story.
 
-**Data reality:** `hv202` (alternative source) is not recorded for any household in this NFHS-5
-dataset — all households show "No Other Source." This means we cannot distinguish score 2 from
-score 3 for piped households, and score 0 from score 1 for non-piped households. In practice,
-Dim 1 is effectively a binary: piped = 3, non-piped = 0. This is a data limitation we note in
-the paper. Despite this, Dim 1 remains the strongest predictor in the index (r = +0.179 with
-disruption) because the piped/non-piped distinction itself is the core of the paradox.
+---
 
-### 2.3 Dimension 2 — Access Complexity
+### 2.3 The four dimensions — plain language
 
-**The question it answers:** When the tap fails, does this household have any experience
-fetching water? Can they physically go get water from somewhere else?
+Think of each dimension as one question you ask about a household:
 
-**The key insight — why we invert the traditional framing:** In standard vulnerability indices,
-"water in dwelling" is considered a positive outcome (easier access). We argue the opposite
-for disruption preparedness. A household that fetches water daily has:
-- Established physical routes to alternative sources
-- Containers and equipment for carrying water
-- Knowledge of which sources are open and when
-- Physical practice for the task
+---
 
-A household with water piped directly into the dwelling has **none of these**. When the tap
-fails, they are completely unprepared. This is the "access complexity" paradox within the
-main infrastructure paradox.
+**Dim 1 — Source Lock-in**
+*Question: If your tap fails, do you have a non-piped backup?*
 
-**How we score it (0–3, higher = more dependent):**
+- Score 3 → Piped, no backup (or another piped connection as backup). Nowhere to go.
+- Score 2 → Piped, but has a tube well or protected well nearby. Has an exit.
+- Score 1 → Non-piped primary, same-type backup (two tube wells). Limited diversity.
+- Score 0 → Non-piped primary, different-type backup. Genuinely diversified.
 
-| Score | Situation | Why this score |
-|-------|-----------|----------------|
-| 3 | `water_on_premises = 1` | Water flows to the tap; household has never fetched. Zero coping experience. |
-| 2 | Off-premises, water in yard/plot | Short walk; minimal fetching experience |
-| 1 | Off-premises, elsewhere, < 15 min walk | Regular fetching; some routine established |
-| 0 | Off-premises, elsewhere, ≥ 15 min walk | Experienced daily fetcher; best-prepared for disruption |
+**In the data:** `hv202` (alternative source) is not recorded for any household in NFHS-5.
+Every household shows "No Other Source." So in practice Dim 1 is binary:
+piped = 3, non-piped = 0.
+That means Dim 1 is essentially just piped_flag again, dressed up.
+It is the strongest dimension (loading 0.622) precisely because the piped/non-piped
+distinction is the whole point. But it is not adding new information beyond piped_flag.
 
-**Critical technical note — the pipeline collision fix:**
+---
 
-The NFHS-5 pipeline stores `hv204 = 996` to mean "water is on the premises" (no travel time).
-When loading data, `water_on_premises = 1` is derived from `hv204 == 996`, and then `hv204`
-is replaced with 0 minutes. Separately, `hv235` (water location) is only asked when water is
-*not* on the premises — so all on-premises households have `water_location = "Unknown"`.
+**Dim 2 — Access Complexity**
+*Question: Have you ever had to go fetch water? Do you know how?*
 
-In the **old version**, the scorer only looked at `water_location`, which meant 453,254
-on-premises households (78% of all households in the sample) got the default score of 1
-instead of the correct score of 3. This caused Dim 2 to have a **negative** PCA loading
-(−0.419) — the opposite direction from the theory.
+- Score 3 → Water on-premises (`water_on_premises = 1`). Never fetched. No idea how.
+- Score 2 → Water in yard/plot. Walk a few steps. Minimal experience.
+- Score 1 → Elsewhere, under 15 min. Some routine.
+- Score 0 → Elsewhere, 15+ min. Daily fetcher. Knows exactly what to do when source fails.
 
-In the **current version**, we check `water_on_premises` first. If it equals 1, the household
-scores 3 regardless of `water_location`. Only off-premises households use `water_location`
-and travel time for scoring. This fixed the loading from −0.419 to **+0.128**.
+**The flip:** In normal water indices, "water in dwelling" is good. Here it is bad for
+disruption preparedness — you have never needed to cope because the tap always worked.
 
-**Why 0.128 is the weakest loading:** Most households (78%) are on-premises and all score 3.
-This creates very little variance in Dim 2 — nearly everyone gets the same score, so the
-dimension adds little discriminating power to the PCA. This is a data structure issue, not a
-conceptual flaw. In a dataset with more variation in water location, Dim 2 would be stronger.
+**Technical fix:** NFHS-5 only records `water_location` for off-premises households.
+On-premises households show "Unknown" in `water_location`. Old code scored them as
+neutral (1). That was wrong — they should score 3 (most dependent).
+Fix: check `water_on_premises = 1` first, then use location for off-premises only.
+This changed the loading from −0.419 (backwards) to +0.128 (correct direction).
 
-### 2.4 Dimension 3 — System Dependency
+**Why loading is low (0.128):** 78% of all households have water on-premises and all
+score 3. Almost no variation. A dimension with no variation adds nothing to PCA.
 
-**The question it answers:** If the primary source fails, how much does getting water from
-somewhere else depend on formal systems or market access?
+---
 
-**Why market dependency matters:** When a centralised system fails during a genuine crisis
-(summer 2019 Chennai, for example), tanker water prices spike dramatically. A household
-whose only coping option is to buy from a tanker vendor is at the mercy of both the failed
-piped system AND the vendor's willingness to supply at a price they can afford. This is
-a second layer of vulnerability that Dim 1 alone does not capture.
+**Dim 3 — System Dependency**
+*Question: If your primary source fails, getting water from somewhere else requires... what?*
 
-**How we score it (0–3, higher = more dependent):**
+- Score 3 → Tanker or cart. Pure market. Expensive. Prices spike in crises.
+- Score 2 → Piped water. Depends on a utility. One centralised failure affects everyone.
+- Score 1 → Community RO plant or protected well. Semi-managed. Locally accessible.
+- Score 0 → Tube well, own well, rainwater. Self-sufficient. No one else controls it.
 
-| Score | Situation | Why this score |
-|-------|-----------|----------------|
-| 3 | Tanker truck or cart | Pure market — expensive, supply uncertain, prices spike in crises |
-| 2 | Any piped sub-type | Centralised single point of failure — operator-controlled |
-| 1 | Community RO, protected well, protected spring | Semi-managed — community level, less central failure risk |
-| 0 | Own well, rainwater, surface water, tube well | Self-sufficient — household controls access |
+**In the data:** Dim 3 correlates 0.873 with Dim 1. Both are mostly saying "are you piped?"
+from slightly different angles. Dim 1 asks about backup. Dim 3 asks about your primary source.
+For piped households both score high. For tube-well households both score 0.
 
-**Note on tube well scoring 0:** Tube wells score 0 on System Dependency because a household
-*using a tube well as its primary source* manages it locally — it does not depend on a utility
-or market. This is different from Dim 1, where a piped household with a tube well *backup* scores
-2 (has an escape route). The dimensions measure different things.
+---
 
-**PCA loading: 0.606** — second strongest after Dim 1. Dims 1 and 3 correlate at 0.873 with
-each other because both are largely driven by whether the household uses piped water. They
-are measuring the same piped-dependency from two angles: "do you have a backup?" (Dim 1) and
-"does your primary source make you dependent on formal systems?" (Dim 3).
+**Dim 4 — Piped Coping Deficit**
+*Question: You are piped and the tap has just failed. Can you cope?*
 
-### 2.5 Dimension 4 — Piped Coping Deficit
+This dimension ONLY applies to piped households.
+Non-piped households score 0 no matter what — they already fetch, they already cope.
+The deficit concept only makes sense for someone who normally depends on a tap.
 
-**The question it answers:** Among piped households specifically, when the tap fails, can this
-household actually cope — through stored water, mobility, or wealth?
+For piped households:
+- Buffer score = wealth contribution (Q1=0, Q2=0, Q3=1, Q4=2, Q5=3) + fridge (0/1) + vehicle (0/1), clipped to [0, 3]
+- Coping Deficit score = 3 minus the buffer
 
-**Why we gate on `piped_flag`:** This is the most important design decision in Dim 4.
+| Example | Buffer score | Coping Deficit score |
+|---|---|---|
+| Richest, has fridge AND vehicle | 3+1+1 = 3 (clipped) | 3−3 = **0** (can cope) |
+| Middle, has vehicle only | 1+0+1 = 2 | 3−2 = **1** |
+| Poorest, nothing | 0+0+0 = 0 | 3−0 = **3** (totally stuck) |
 
-In the **old version**, the coping deficit was calculated for all households. But non-piped
-households with no fridge and no vehicle are *not* in deficit — they already fetch water daily.
-They have a practiced routine. Lacking a fridge does not hurt them because they do not need
-storage; they go get fresh water when needed.
+**Why gate on piped_flag?** Without the gate, a poor non-piped household with no fridge
+scores Dim 4 = 3 — but they are NOT in deficit. They fetch every day and are completely
+fine. Only piped households need this dimension. Gating on piped_flag changed the loading
+from −0.239 (wrong direction) to +0.478 (correct) and Cronbach α from −0.285 to 0.706.
 
-The coping deficit concept only applies to households that **depend on a tap** that can fail
-and then suddenly need to cope without their normal supply. That is only piped households.
+**What Dim 4 adds that piped_flag cannot:** Among piped households, a rich one and a poor
+one both have piped_flag = 1, but their Dim 4 scores are 0 and 3 respectively. Dim 4 is
+the only dimension that separates them. This is what produces the "rich locked in but
+buffered, poor unbuffered" finding in Figure 1.
 
-In the data, this matters:
-- Non-piped: `has_fridge = 0` → 12.1% disruption, `has_fridge = 1` → 13.0% (barely different)
-- Piped only: `has_fridge = 0` → **27.9%** disruption, `has_fridge = 1` → **25.3%** (correct direction)
+---
 
-By gating on `piped_flag`, Dim 4's loading went from **−0.239** (wrong direction) to **+0.478**
-(correct direction) and Cronbach's alpha went from −0.285 to **0.706**.
+### 2.4 The honest summary — what IDI actually is in the data
 
-**How we score it (0–3, higher = more deficit):**
+| Dimension | In plain terms | What the data actually shows |
+|---|---|---|
+| Dim 1 | Do you have piped water with no backup? | Piped = 3, non-piped = 0. Effectively piped_flag. |
+| Dim 2 | Do you have water on-premises? | 78% of HH score 3. Very low variance. Weak dimension. |
+| Dim 3 | Are you dependent on a centralised system? | Piped = 2, tube well = 0. Mostly piped_flag again. |
+| Dim 4 | Are you piped AND poor AND have no assets? | Only varies among piped HH. The genuinely new information. |
 
-Step 1 — Build the buffer score (what the household has):
+**Dims 1, 2, 3 are mostly restating piped_flag.**
+**Dim 4 is where the IDI adds genuine new information — separating rich piped from poor piped.**
 
-| Component | How it contributes |
-|-----------|-------------------|
-| Wealth quintile | Q1 → 0, Q2 → 0, Q3 → 1, Q4 → 2, Q5 → 3 |
-| Has refrigerator (`hv209 = 1`) | +1 (can store several days of water) |
-| Has vehicle (`hv210/211/212 = 1`) | +1 (can fetch from distant alternative) |
-| **Total buffer** | **Clipped to [0, 3]** |
+This is why the IDI is used descriptively and not in regressions.
+The dimension profiles (Table 4 in the paper — IDI by wealth quintile) and Figure 1
+(stacked bar chart) are where the IDI earns its place.
 
-Step 2 — Convert to lock-in score:
-- If `piped_flag = 1`: Coping Deficit = 3 − buffer (high buffer → low deficit → low score)
-- If `piped_flag = 0`: Coping Deficit = **0** (concept does not apply)
+---
 
-**PCA loading: 0.478** — this is now a meaningful positive contributor to the index.
+### 2.5 IDI validation numbers
+
+| Check | Value | What it means |
+|---|---|---|
+| Cronbach α = 0.706 | Good internal consistency | The 4 dimensions measure the same underlying thing |
+| AUC = 0.619 | Modest predictive power | IDI predicts disruption slightly better than chance |
+| r(IDI, disruption) = 0.180 | Positive, significant | Higher lock-in → more disruption |
+| r(IDI, wealth) = 0.170 | Well below 0.50 | IDI is NOT just a wealth proxy |
+| Mean IDI: piped − tube well = +59.4 | Large gap | Piped HH are structurally far more locked in |
+| 100% MC runs OR(piped) > 1 | Fully robust | The piped paradox holds regardless of how we score the dimensions |
 
 ---
 

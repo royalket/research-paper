@@ -41,6 +41,11 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Tuple, Optional, Any
 
+import matplotlib
+matplotlib.use("Agg")   # non-interactive backend — safe for script runs
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 from statsmodels.regression.linear_model import WLS
@@ -447,6 +452,204 @@ class IDIDimensionTable:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# IDI FIGURES
+# ─────────────────────────────────────────────────────────────────────────────
+
+class IDIFigures:
+    """
+    Figure 1 — Stacked bar: IDI dimension scores by wealth quintile.
+               Shows that Dims 1+3 grow with wealth (more piped adoption)
+               while Dim 4 shrinks (more coping assets). Dim 2 roughly flat.
+               The rich vs poor piped mechanism story in one image.
+
+    Figure 2 — Scatter: disruption rate vs IDI composite by water source.
+               Each dot = one source category, sized by household count.
+               Shows piped sub-types cluster top-right (high IDI, high disruption)
+               and tube well sits bottom-left (low IDI, low disruption).
+    """
+
+    DIM_COLS   = ["idi_dim1", "idi_dim2", "idi_dim3", "idi_dim4"]
+    DIM_LABELS = ["Dim 1: Source Lock-in", "Dim 2: Access Complexity",
+                  "Dim 3: System Dependency", "Dim 4: Coping Deficit"]
+    DIM_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+
+    def __init__(self, df: pd.DataFrame, cfg: Config):
+        self.df  = df
+        self.cfg = cfg
+
+    def run_all(self):
+        print("\n  Generating IDI figures...", flush=True)
+        self._figure1_stacked_bar_by_wealth()
+        self._figure2_scatter_source()
+        print("  ✓  IDI figures saved.", flush=True)
+
+    def _figure1_stacked_bar_by_wealth(self):
+        """
+        Stacked bar chart: IDI dimension scores by wealth quintile.
+        Each bar = one quintile. Segments = 4 dimensions.
+        Clear visual of the rich-locked-in-but-buffered pattern.
+        """
+        df = self.df
+        if "wealth_quintile" not in df.columns:
+            return
+
+        order = ["Poorest", "Poorer", "Middle", "Richer", "Richest"]
+        present = [q for q in order if q in df["wealth_quintile"].values]
+        means = (df.groupby("wealth_quintile")[self.DIM_COLS]
+                   .mean()
+                   .reindex(present))
+
+        fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+        fig.suptitle(
+            "Figure 1. IDI Dimension Scores by Wealth Quintile",
+            fontsize=13, fontweight="bold", y=1.01
+        )
+
+        # Left panel — stacked bar
+        ax = axes[0]
+        x   = np.arange(len(present))
+        bottom = np.zeros(len(present))
+        for col, label, color in zip(self.DIM_COLS, self.DIM_LABELS, self.DIM_COLORS):
+            vals = means[col].values
+            ax.bar(x, vals, bottom=bottom, label=label, color=color,
+                   width=0.6, edgecolor="white", linewidth=0.5)
+            bottom += vals
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(present, fontsize=10)
+        ax.set_ylabel("Mean Dimension Score (0–3 each)", fontsize=10)
+        ax.set_xlabel("Wealth Quintile", fontsize=10)
+        ax.set_title("Stacked dimension scores\n(higher = more locked in)", fontsize=10)
+        ax.legend(fontsize=8, loc="upper left")
+        ax.set_ylim(0, 10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        # Right panel — IDI composite line + disruption rate
+        ax2 = axes[1]
+        idi_means = (df.groupby("wealth_quintile")["idi_mean"]
+                       .mean().reindex(present))
+        disr_rates = (df.groupby("wealth_quintile")[self.cfg.VAR_DISRUPTED]
+                        .mean().mul(100).reindex(present))
+
+        color1, color2 = "#1f77b4", "#d62728"
+        lns1 = ax2.plot(present, idi_means.values, "o-",
+                        color=color1, linewidth=2, markersize=7,
+                        label="IDI Composite (0–100)", zorder=3)
+        ax2.set_ylabel("IDI Composite (0–100)", color=color1, fontsize=10)
+        ax2.tick_params(axis="y", labelcolor=color1)
+
+        ax3 = ax2.twinx()
+        lns2 = ax3.plot(present, disr_rates.values, "s--",
+                        color=color2, linewidth=2, markersize=7,
+                        label="Disruption rate (%)", zorder=3)
+        ax3.set_ylabel("Disruption Rate (%)", color=color2, fontsize=10)
+        ax3.tick_params(axis="y", labelcolor=color2)
+
+        ax2.set_xlabel("Wealth Quintile", fontsize=10)
+        ax2.set_title("IDI vs disruption rate by quintile\n(richer = more locked in but lower disruption)",
+                      fontsize=10)
+        ax2.spines["top"].set_visible(False)
+
+        lines  = lns1 + lns2
+        labels = [l.get_label() for l in lines]
+        ax2.legend(lines, labels, fontsize=8, loc="upper left")
+
+        plt.tight_layout()
+        out = self.cfg.OUTPUT_DIR / "figures" / "figure1_idi_by_wealth.png"
+        fig.savefig(out, dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        print(f"  Figure 1 → {out}", flush=True)
+
+    def _figure2_scatter_source(self):
+        """
+        Scatter plot: disruption rate vs IDI composite by water source.
+        Dot size = household count. Annotated with source names.
+        Shows piped sub-types (top-right) vs tube well (bottom-left).
+        """
+        df  = self.df
+        cfg = self.cfg
+
+        if "water_source" not in df.columns or "idi_mean" not in df.columns:
+            return
+
+        agg = df.groupby("water_source").agg(
+            idi     = ("idi_mean",               "mean"),
+            disr    = (cfg.VAR_DISRUPTED,         lambda x:
+                       np.average(x, weights=df.loc[x.index, "weight"]) * 100),
+            n       = ("weight",                  "count"),
+        ).reset_index()
+
+        # Remove tiny categories (< 500 households) to keep chart readable
+        agg = agg[agg["n"] >= 500].copy()
+
+        piped_sources = [s for s in agg["water_source"] if s.startswith("Piped")]
+        is_piped      = agg["water_source"].isin(piped_sources)
+
+        fig, ax = plt.subplots(figsize=(10, 7))
+
+        sizes = (agg["n"] / agg["n"].max() * 400).clip(30, 400)
+
+        # Non-piped dots
+        ax.scatter(
+            agg.loc[~is_piped, "idi"],
+            agg.loc[~is_piped, "disr"],
+            s=sizes[~is_piped],
+            color="#2ca02c", alpha=0.7, edgecolors="white", linewidth=0.8,
+            zorder=3, label="Non-piped sources"
+        )
+        # Piped dots
+        ax.scatter(
+            agg.loc[is_piped, "idi"],
+            agg.loc[is_piped, "disr"],
+            s=sizes[is_piped],
+            color="#d62728", alpha=0.85, edgecolors="white", linewidth=0.8,
+            zorder=4, label="Piped sub-types"
+        )
+
+        # Labels for each dot
+        for _, row in agg.iterrows():
+            # Shorten long source names for readability
+            name = (row["water_source"]
+                    .replace("Piped — ", "")
+                    .replace("Surface Water (river/lake/canal)", "Surface Water")
+                    .replace("Tube Well/Borehole", "Tube Well"))
+            ax.annotate(
+                name,
+                xy=(row["idi"], row["disr"]),
+                xytext=(5, 3), textcoords="offset points",
+                fontsize=8, color="black",
+                bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.6, ec="none")
+            )
+
+        # Reference lines at tube-well values
+        tw = agg[agg["water_source"] == "Tube Well/Borehole"]
+        if len(tw):
+            ax.axhline(float(tw["disr"]), color="grey", linestyle=":",
+                       linewidth=1, alpha=0.6, label=f"Tube well disruption ({float(tw['disr']):.1f}%)")
+            ax.axvline(float(tw["idi"]), color="grey", linestyle="--",
+                       linewidth=1, alpha=0.6, label=f"Tube well IDI ({float(tw['idi']):.1f})")
+
+        ax.set_xlabel("IDI Composite Score (0–100)\n← less locked in   more locked in →",
+                      fontsize=11)
+        ax.set_ylabel("Weighted Disruption Rate (%)", fontsize=11)
+        ax.set_title(
+            "Figure 2. Disruption Rate vs Infrastructure Dependency Index by Water Source\n"
+            "Dot size proportional to household count. Dashed lines = tube-well reference.",
+            fontsize=11, fontweight="bold"
+        )
+        ax.legend(fontsize=9, loc="upper left")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+
+        plt.tight_layout()
+        out = self.cfg.OUTPUT_DIR / "figures" / "figure2_idi_scatter_source.png"
+        fig.savefig(out, dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        print(f"  Figure 2 → {out}", flush=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # FINDING 2 — IDI REGRESSION
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -472,8 +675,12 @@ class IDIRegression:
         cfg = self.cfg
         df  = self.df.copy()
 
+        # IDI removed from this regression — piped_flag and idi_mean are highly
+        # collinear (both driven by piped adoption), causing IDI to go negative
+        # in the joint model. IDI is used descriptively (dimension profiles,
+        # CRISIS typology); piped_flag carries the inferential claim here.
         core_vars = [
-            cfg.VAR_DISRUPTED, "piped_flag", "idi_mean",
+            cfg.VAR_DISRUPTED, "piped_flag",
             "wealth_q_num", "urban", "hh_size", "children_u5",
             "region", cfg.VAR_PSU, "weight",
         ]
@@ -486,7 +693,7 @@ class IDIRegression:
         social = _social_terms(df_reg)
         formula = (
             f"{cfg.VAR_DISRUPTED} ~ "
-            "piped_flag + idi_mean + piped_flag:idi_mean "
+            "piped_flag "
             "+ wealth_q_num + urban + hh_size + children_u5 "
             f"+ C(region) {social}"
         )
@@ -523,15 +730,13 @@ class IDIRegression:
         pvals  = model.pvalues
 
         key_terms = {
-            "piped_flag":           "Piped Water (vs non-piped)",
-            "idi_mean":             "IDI Score",
-            "piped_flag:idi_mean":  "Piped × IDI  [KEY INTERACTION]",
-            "wealth_q_num":         "Wealth Quintile",
-            "urban":                "Urban",
-            "sc_st_flag":           "SC/ST household",
-            "female_headed":        "Female-headed household",
-            "hh_size":              "Household size",
-            "children_u5":          "Children under 5",
+            "piped_flag":   "Piped Water (vs non-piped)",
+            "wealth_q_num": "Wealth Quintile",
+            "urban":        "Urban",
+            "sc_st_flag":   "SC/ST household",
+            "female_headed":"Female-headed household",
+            "hh_size":      "Household size",
+            "children_u5":  "Children under 5",
         }
         rows = []
         for term, label in key_terms.items():
@@ -681,8 +886,11 @@ class MultilevelModel:
         cfg = self.cfg
         df  = self.df.copy()
 
+        # IDI removed from GEE — same collinearity reason as IDIRegression.
+        # GEE's job here is the district-level RGI effect (OR = 1.675).
+        # IDI stays in the pipeline for descriptive use only.
         core_vars = [
-            cfg.VAR_DISRUPTED, "idi_mean", "rgi",
+            cfg.VAR_DISRUPTED, "rgi",
             "piped_flag", "wealth_q_num", "urban",
             "hh_size", "children_u5", "region",
             "district_code", "weight",
@@ -693,11 +901,7 @@ class MultilevelModel:
             print("  ⚠  Too few complete cases (need RGI merged).")
             return pd.DataFrame()
 
-        # Standardise IDI and RGI for interpretable interaction coefficient
-        df_reg["idi_std"] = (
-            (df_reg["idi_mean"] - df_reg["idi_mean"].mean())
-            / df_reg["idi_mean"].std()
-        )
+        # Standardise RGI for interpretable coefficient
         df_reg["rgi_std"] = (
             (df_reg["rgi"] - df_reg["rgi"].mean())
             / df_reg["rgi"].std()
@@ -706,8 +910,7 @@ class MultilevelModel:
         social = _social_terms(df_reg)
         formula = (
             f"{cfg.VAR_DISRUPTED} ~ "
-            "idi_std + rgi_std + idi_std:rgi_std "
-            "+ piped_flag + wealth_q_num + urban "
+            "rgi_std + piped_flag + wealth_q_num + urban "
             f"+ hh_size + children_u5 + C(region) {social}"
         )
         print(f"  Formula: {formula}")
@@ -755,14 +958,12 @@ class MultilevelModel:
         pvals  = model.pvalues
 
         key_terms = {
-            "idi_std":          "IDI Score (std)",
-            "rgi_std":          "RGI Score (std)",
-            "idi_std:rgi_std":  "IDI × RGI  [CROSS-LEVEL INTERACTION]",
-            "piped_flag":       "Piped Water",
-            "wealth_q_num":     "Wealth Quintile",
-            "urban":            "Urban",
-            "sc_st_flag":       "SC/ST household",
-            "female_headed":    "Female-headed",
+            "rgi_std":      "RGI Score (std)  [DISTRICT UNDERPERFORMANCE]",
+            "piped_flag":   "Piped Water",
+            "wealth_q_num": "Wealth Quintile",
+            "urban":        "Urban",
+            "sc_st_flag":   "SC/ST household",
+            "female_headed":"Female-headed",
         }
         rows = []
         for term, label in key_terms.items():
@@ -1249,6 +1450,9 @@ class Analyzer:
         idi_dims = IDIDimensionTable(self.df, self.cfg,
                                      dim_profiles=idi_dim_profiles)
         all_tables.update(idi_dims.run_all())
+
+        # IDI figures — Figure 1 (stacked bar by wealth) + Figure 2 (scatter by source)
+        IDIFigures(self.df, self.cfg).run_all()
 
         # Finding 2
         idi_reg = IDIRegression(self.df, self.cfg)

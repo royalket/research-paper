@@ -194,6 +194,31 @@ A binary piped/non-piped indicator identifies which households experience the pa
 <!-- P3 | Role: Design — four dimensions and scoring logic -->
 The IDI comprises four dimensions, each scored 0–3 where higher scores indicate greater lock-in. Dimension 1 (Source Lock-in) measures whether the household has any non-piped backup: piped primary with no alternative or a piped alternative scores 3; piped with a non-piped backup scores 2; non-piped with same-category backup scores 1; non-piped with a different-category backup scores 0. Dimension 2 (Access Complexity) measures fetching experience: households with water on-premises — derived from NFHS-5 variable hv204 = 996, indicating the source is at or within the dwelling — score 3, reflecting zero fetching experience; off-premises households score 2, 1, or 0 depending on whether the collection point is in the yard, within 15 minutes, or 15 minutes or more away. Dimension 3 (System Dependency) scores how much obtaining alternative water requires market access: tanker truck or cart scores 3; any piped sub-type scores 2; community RO plant or protected well or spring scores 1; tube well, rainwater, or surface water scores 0. Dimension 4 (Piped Coping Deficit) applies only to piped households and measures their buffer capacity: a buffer score is computed as wealth quintile contribution (Q1–Q2 → 0, Q3 → 1, Q4 → 2, Q5 → 3) plus refrigerator ownership plus vehicle ownership, clipped to [0, 3]; the coping deficit score is 3 minus the buffer, so poorest piped households with no assets score 3 and richest piped households with full assets score 0. Non-piped households score 0 on Dimension 4 regardless of assets, because their disruption exposure is structurally different — they already fetch regularly and maintain a practiced routine.
 
+**Table 2. IDI validation checks.**
+Cronbach α and PCA results from the full analysis sample (n = 578,062).
+AUC is weighted. Discriminant validity threshold |r| < 0.50 ensures IDI is not a
+wealth proxy.
+
+| Check | Metric | Value | Target | Pass |
+|---|---|---|---|---|
+| Predictive validity | Pearson r (IDI vs disruption) | 0.180, p < .001 | r > 0 | ✓ |
+| Predictive validity | ROC-AUC | 0.619 | > 0.60 | ✓ |
+| Discriminant validity | r (IDI vs wealth score) | 0.170, p < .001 | \|r\| < 0.50 | ✓ |
+| Known-groups validity | Mean IDI: piped − tube well | +59.4 points | Piped > TW | ✓ |
+| Internal consistency | Cronbach α | 0.706 | > 0.60 | ✓ |
+
+**Table 3. IDI dimension scores and PCA loadings.**
+Mean scores on 0–3 scale (higher = more locked in). PC1 explains 57.7% of total variance.
+All loadings positive, confirming consistent lock-in directionality across all four dimensions.
+
+| Dimension | Mean | SD | PCA Loading | What a high score means |
+|---|---|---|---|---|
+| Dim 1: Source Lock-in | 1.608 | 1.496 | **0.622** | Piped primary, no non-piped backup |
+| Dim 2: Access Complexity | 2.487 | 1.002 | 0.128 | Water on-premises, no fetching experience |
+| Dim 3: System Dependency | 1.190 | 0.998 | **0.606** | Dependent on centralised or market supply |
+| Dim 4: Piped Coping Deficit | 0.649 | 1.098 | 0.478 | Piped + poor + no fridge + no vehicle |
+| IDI Composite (0–100) | 42.752 | 29.624 | — | Overall structural lock-in |
+
 <!-- P4 | Role: Technical advantage — PCA weighting, two design fixes, Monte Carlo -->
 Three design choices distinguish the IDI from a simple additive index. First, the four dimensions are combined via the first principal component of their standardised scores rather than summed with equal weights. Dimensions 1 and 3 correlate at r = 0.873 — both are driven primarily by piped adoption — and equal weighting would double-count this signal. PCA assigns a joint loading of 0.622 + 0.606 = 1.228 to the two correlated dimensions and 0.128 + 0.478 = 0.606 to the two less-correlated dimensions, naturally down-weighting redundant information. PC1 explains 57.7% of total variance across the four dimensions; all four loadings are positive (confirming consistent lock-in directionality); and Cronbach α = 0.706, indicating adequate internal consistency for a four-item composite. Second, Dimension 4 is gated on piped_flag. Without this gate, wealth and vehicle ownership are confounded with piped adoption — richer households are more likely to be piped — and the loading on Dimension 4 becomes negative (−0.239 in early versions), pulling the index in the wrong direction. Among piped households only, the correct direction is confirmed: households without a refrigerator have 27.9% disruption versus 25.3% for those with one, and households without a vehicle have 27.3% versus 26.2%. Third, to quantify uncertainty in the dimension scoring thresholds, we run 500 Monte Carlo iterations, each adding Gaussian noise N(0, 0.3) to all dimension scores and recording OR(piped) from a logistic regression on the perturbed IDI. OR(piped) exceeds 1.0 in all 500 runs (mean = 1.753, 95% range: 1.724–1.780), confirming the paradox is not an artifact of any particular scoring choice.
 
@@ -238,6 +263,48 @@ The fourth approach provides causal identification. All regression models in Sec
 
 <!-- P1 | Role: Finding 1a — The paradox in raw data -->
 Piped water households experience supply disruptions at more than twice the rate of tube-well households: 25.5% versus 10.5%, a relative risk of 2.43 (Table 1, 95% CI for piped: 25.2–25.7%; for tube well: 10.3–10.6%). Among the four piped sub-types, yard/plot connections have the highest disruption rate at 29.7% (RR = 2.83 vs tube well), followed by neighbour/shared connections at 26.1% (RR = 2.49), public tap or standpipe at 23.9% (RR = 2.28), and in-dwelling connections at 23.6% (RR = 2.25). This within-piped gradient — yard/plot connections having 6.1 percentage points more disruption than in-dwelling connections — is consistent with network pressure dynamics: peripheral connections are the first to lose pressure when centralised supply is stressed, and they experience shutdowns before in-dwelling connections do. Tube wells (10.5%) have lower disruption than bottled water (10.7%), community RO plants (17.7%), and tanker trucks (24.2%), confirming that the low disruption rate of decentralised self-sufficient sources is not a feature unique to tube wells but reflects the structural independence of sources that do not depend on a shared distribution network.
+
+**Table 4. IDI dimension scores by wealth quintile, NFHS-5 (n = 578,062).**
+All scores on 0–3 scale (higher = more locked in). IDI composite on 0–100 scale.
+Dims 1 and 3 increase with wealth (richer households adopt piped water at higher rates).
+Dim 4 decreases sharply with wealth (richer households have assets to cope when tap fails).
+See Figure 1 for visual.
+
+| Wealth Quintile | Dim 1: Source Lock-in | Dim 2: Access Complexity | Dim 3: System Dependency | Dim 4: Coping Deficit | IDI (0–100) |
+|---|---|---|---|---|---|
+| Poorest | 0.975 | 1.995 | 0.686 | **0.933** | 32.8 |
+| Poorer | 1.422 | 2.374 | 1.024 | **1.250** | 44.1 |
+| Middle | 1.772 | 2.578 | 1.307 | 0.731 | 46.4 |
+| Richer | 1.948 | 2.754 | 1.483 | 0.073 | 44.8 |
+| Richest | **2.134** | **2.898** | **1.624** | 0.000 | 47.7 |
+
+**Table 5. IDI dimension scores by urban/rural, NFHS-5.**
+Urban households score higher on Dims 1–3 (higher piped adoption).
+Rural households score higher on Dim 4 (fewer coping assets).
+
+| Residence | Dim 1: Source Lock-in | Dim 2: Access Complexity | Dim 3: System Dependency | Dim 4: Coping Deficit | IDI (0–100) |
+|---|---|---|---|---|---|
+| Rural | 1.414 | 2.390 | 1.031 | 0.735 | 39.8 |
+| Urban | **2.162** | **2.764** | **1.641** | 0.405 | **51.2** |
+
+**Table 6. IDI dimension scores by water source, NFHS-5.**
+All piped sub-types have Dim 1 = 3 and Dim 3 = 2 (maximally locked in on both dimensions).
+Tube wells score near zero on all dimensions except Dim 2 (they fetch, so Dim 2 = 2.2).
+This confirms the IDI captures the structural difference the regression finds.
+See Figure 2 for scatter plot.
+
+| Water Source | Dim 1 | Dim 2 | Dim 3 | Dim 4 | IDI (0–100) |
+|---|---|---|---|---|---|
+| Piped — Neighbour/Shared | 3.0 | 3.0 | 2.0 | 1.936 | **75.9** |
+| Piped — Yard/Plot | 3.0 | 3.0 | 2.0 | 1.376 | 71.1 |
+| Piped — Public Tap | 3.0 | 1.6 | 2.0 | 1.786 | 71.1 |
+| Piped — Into Dwelling | 3.0 | 3.0 | 2.0 | 0.635 | 64.9 |
+| Tanker Truck | 0.0 | 2.3 | 3.0 | 0.000 | 44.8 |
+| Bottled Water | 0.0 | 2.1 | 3.0 | 0.000 | 44.4 |
+| Protected Well | 0.0 | 3.0 | 1.0 | 0.000 | 22.6 |
+| Community RO Plant | 0.0 | 2.5 | 1.0 | 0.000 | 21.3 |
+| Unprotected Well | 0.0 | 3.0 | 0.0 | 0.000 | 11.4 |
+| Tube Well/Borehole | 0.0 | 2.2 | 0.0 | 0.000 | **9.4** |
 
 <!-- P2 | Role: Finding 1b — The paradox holds across all strata -->
 The piped–tube well disruption gap is not explained by any single socioeconomic or geographic stratum. By wealth quintile (Table 1b), the gap ranges from 13.0 percentage points in the poorest quintile (piped 23.8%, tube well 10.8%, RR = 2.20) to 17.2 pp in the middle quintile (piped 27.7%, tube well 10.5%, RR = 2.64); it narrows modestly for the richest households (11.9 pp, RR = 2.17), consistent with storage assets buffering disruption effects but not eliminating them. By residence (Table 1c), the gap is 15.9 pp in rural areas (RR = 2.51) and 13.9 pp in urban areas (RR = 2.32); the rural gap being larger is unexpected under the assumption that urban piped systems are better maintained, and suggests that rural piped networks may suffer more from weak operation and maintenance. By region (Table 1d), the Northeast shows the largest relative risk (piped 26.2%, tube well 7.8%, RR = 3.36), while the East shows the smallest (piped 12.8%, tube well 9.3%, RR = 1.38), where lower piped coverage means networks are less over-extended. By season (Table 1e), the monsoon months show the largest absolute gap (piped 32.0%, tube well 13.3%, difference = 18.7 pp), while summer shows the highest relative risk (piped 21.5%, tube well 8.0%, RR = 2.69), reflecting demand-side pressure on centralised supply during dry months. The paradox is present in every cell of every stratification.
